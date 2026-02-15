@@ -5,6 +5,6 @@ export default async function SessionLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireAuth("/session");
+  // await requireAuth("/session");
   return <>{children}</>;
 }
