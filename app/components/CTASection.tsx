@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 const block = (delay: number) => ({
   hidden: { opacity: 0, y: 20 },
@@ -12,7 +13,7 @@ const block = (delay: number) => ({
       delay,
     },
   },
-})
+});
 
 export default function CTASection() {
   return (
@@ -28,19 +29,30 @@ export default function CTASection() {
           Ready to start learning?
         </h2>
 
-        <p className="mt-4 text-lg text-slate-600">
-          Get step-by-step math tutoring with a calm interface and an interactive whiteboard.
-        </p>
+        <motion.p
+          variants={block(0.1)}
+          className="mx-auto mt-4 max-w-2xl text-slate-600"
+        >
+          Step-by-step explanations. Guided practice. A simple whiteboard that
+          shows every move — without pressure or rushing.
+        </motion.p>
 
-        <div className="mt-8">
-          <a
+        <motion.div variants={block(0.14)} className="mt-8 flex justify-center">
+          <Link
             href="/session"
             className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 text-white font-semibold hover:bg-slate-800 transition"
           >
-            Start a session
-          </a>
-        </div>
+            Start Free Session
+          </Link>
+        </motion.div>
+
+        <motion.p
+          variants={block(0.18)}
+          className="mt-4 text-sm text-slate-500"
+        >
+          No credit card required
+        </motion.p>
       </motion.div>
     </section>
-  )
+  );
 }
