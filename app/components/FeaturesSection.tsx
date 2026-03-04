@@ -1,91 +1,72 @@
-'use client';
+"use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+
+const container: any = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
+};
+
+const item: any = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+    },
+  },
+};
 
 const features = [
   {
-    icon: "+",
-    title: "Addition practice",
-    body: "Step-by-step addition exercises with clear explanations and checks for understanding.",
-    accent: "text-red-400",
+    title: "Step-by-step explanations",
+    description:
+      "The tutor explains every move clearly so students understand the process — not just the answer.",
   },
   {
-    icon: "−",
-    title: "Subtraction practice",
-    body: "Build confidence by learning clean subtraction strategies and common mistake fixes.",
-    accent: "text-sky-400",
+    title: "Interactive whiteboard",
+    description:
+      "Work through problems visually with a simple whiteboard that mirrors the tutor's explanation.",
   },
   {
-    icon: "× ÷",
-    title: "Multiplication & division",
-    body: "Hands-on practice with patterns, factors, and division strategies that actually stick.",
-    accent: "text-emerald-400",
+    title: "Calm learning experience",
+    description:
+      "No rushing, pressure, or distractions. Just focused tutoring designed to build confidence.",
   },
 ];
 
 export default function FeaturesSection() {
-  const prefersReducedMotion = useReducedMotion();
-
-  const container = prefersReducedMotion
-    ? {}
-    : { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
-
-  const item = prefersReducedMotion
-    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-    : {
-        hidden: { opacity: 0, y: 16 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-      };
-
   return (
-    <section className="relative py-24">
-      {/* subtle divider feel */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-10 h-64 w-[46rem] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl" />
-      </div>
+    <section className="py-24">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 md:grid-cols-3"
+      >
+        {features.map((f) => (
+          <motion.div
+            key={f.title}
+            variants={item}
+            className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm hover:shadow-md transition"
+          >
+            <h3 className="text-lg font-semibold text-slate-900">
+              {f.title}
+            </h3>
 
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
-            Practice areas
-          </div>
-
-          <h2 className="mt-6 text-3xl sm:text-4xl font-semibold tracking-tight text-white">
-            Focused math practice that feels calm.
-          </h2>
-
-          <p className="mt-4 text-white/70">
-            Each topic is taught step-by-step with explanations, examples, and guided practice—no rushing.
-          </p>
-        </div>
-
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
-          className="mt-14 grid gap-8 md:grid-cols-3"
-        >
-          {features.map((f) => (
-            <motion.div
-              key={f.title}
-              variants={item}
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01] hover:border-white/20 hover:bg-white/10"
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <div className="absolute -top-24 left-1/2 h-48 w-[28rem] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
-              </div>
-
-              <div className="relative">
-                <div className={`text-4xl font-bold ${f.accent}`}>{f.icon}</div>
-                <h3 className="mt-5 text-xl font-semibold text-white">{f.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">{f.body}</p>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
+            <p className="mt-3 text-slate-600">
+              {f.description}
+            </p>
+          </motion.div>
+        ))}
+      </motion.div>
     </section>
   );
 }
