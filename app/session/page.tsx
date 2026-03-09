@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import SessionShell from "../../components/session/SessionShell";
 import WhiteboardPanel from "../../components/whiteboard/WhiteboardPanel";
 import TutorPanel from "../../components/session/TutorPanel";
@@ -10,9 +10,18 @@ export default function SessionPage() {
 
   const [messages, setMessages] = useState<any[]>([]);
   const [recording, setRecording] = useState(false);
+
   const boardApiRef = useRef<any>(null);
 
+  // NEW: auto-scroll reference
+  const tutorPanelRef = useRef<any>(null);
+
   const API_BASE = "https://myvirtualtutor-backend-2.onrender.com";
+
+  // NEW: scroll whenever messages update
+  useEffect(() => {
+    tutorPanelRef.current?.scrollToBottom?.();
+  }, [messages]);
 
   const onSend = async (text?: string) => {
 
@@ -127,7 +136,13 @@ export default function SessionPage() {
       </div>
 
       <SessionShell
-        tutor={<TutorPanel messages={messages} onSend={onSend} />}
+        tutor={
+          <TutorPanel
+            ref={tutorPanelRef}
+            messages={messages}
+            onSend={onSend}
+          />
+        }
         whiteboard={<WhiteboardPanel apiRef={boardApiRef} />}
         controls={<SessionControlBar />}
       />
