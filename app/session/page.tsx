@@ -9,6 +9,7 @@ import SessionControlBar from "../../components/session/SessionControlBar";
 export default function SessionPage() {
 
   const [messages, setMessages] = useState<any[]>([]);
+  const [recording, setRecording] = useState(false);
   const boardApiRef = useRef<any>(null);
 
   const API_BASE = "https://myvirtualtutor-backend-2.onrender.com";
@@ -29,9 +30,7 @@ export default function SessionPage() {
 
       const res = await fetch(API_BASE + "/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text })
       });
 
@@ -47,13 +46,8 @@ export default function SessionPage() {
 
       setMessages(prev => [...prev, tutorMsg]);
 
-      if (boardApiRef.current?.clear) {
-        boardApiRef.current.clear();
-      }
-
-      if (boardApiRef.current?.writeLines) {
-        boardApiRef.current.writeLines(reply.split("\n"));
-      }
+      boardApiRef.current?.clear?.();
+      boardApiRef.current?.writeLines?.(reply.split("\n"));
 
     } catch {
 
@@ -70,9 +64,67 @@ export default function SessionPage() {
 
   };
 
+  const startVoiceInput = async () => {
+
+    if (recording) return;
+    setRecording(true);
+
+    try {
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+      mediaRecorder.onstop = async () => {
+
+        const blob = new Blob(chunks, { type: "audio/wav" });
+        const formData = new FormData();
+        formData.append("audio", blob, "speech.wav");
+
+        try {
+
+          const sttRes = await fetch(API_BASE + "/speech-to-text", {
+            method: "POST",
+            body: formData
+          });
+
+          const sttData = await sttRes.json();
+          setRecording(false);
+
+          if (!sttData.ok || !sttData.text) {
+            alert("Speech-to-text failed.");
+          } else {
+            onSend(sttData.text);
+          }
+
+        } catch {
+          alert("Speech processing error.");
+          setRecording(false);
+        }
+
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => mediaRecorder.stop(), 10000);
+
+    } catch (e) {
+      alert("Microphone error: " + e);
+      setRecording(false);
+    }
+
+  };
+
   return (
 
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+
+      <div style={{ padding: "0.5rem", textAlign: "center", backgroundColor: "#f3f3f3" }}>
+        <button onClick={startVoiceInput} disabled={recording} style={{ fontSize: "1.2rem" }}>
+          {recording ? "Recording..." : "🎤 Speak"}
+        </button>
+      </div>
 
       <SessionShell
         tutor={<TutorPanel messages={messages} onSend={onSend} />}
