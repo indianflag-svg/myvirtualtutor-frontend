@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import SessionShell from "../../components/session/SessionShell";
 import WhiteboardPanel from "../../components/whiteboard/WhiteboardPanel";
 import TutorPanel from "../../components/session/TutorPanel";
@@ -8,22 +8,27 @@ import SessionControlBar from "../../components/session/SessionControlBar";
 
 export default function SessionPage() {
 
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(false);
 
-  const boardApiRef = useRef<any>(null);
-
-  // NEW: auto-scroll reference
-  const tutorPanelRef = useRef<any>(null);
+  const boardApiRef = useRef(null);
 
   const API_BASE = "https://myvirtualtutor-backend-2.onrender.com";
 
-  // NEW: scroll whenever messages update
-  useEffect(() => {
-    tutorPanelRef.current?.scrollToBottom?.();
-  }, [messages]);
+  function cleanBoardLines(text) {
 
-  const onSend = async (text?: string) => {
+    return text
+      .replace(/\\\[.*?\\\]/gs, "")      // remove LaTeX blocks
+      .replace(/\*\*/g, "")              // remove markdown bold
+      .replace(/#+/g, "")                // remove headings
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l => l.length > 0)
+      .slice(0, 6);                      // limit lines on board
+
+  }
+
+  const onSend = async (text) => {
 
     if (!text || !text.trim()) return;
 
@@ -44,7 +49,6 @@ export default function SessionPage() {
       });
 
       const data = await res.json();
-
       const reply = data.reply || "Tutor error.";
 
       const tutorMsg = {
@@ -55,8 +59,10 @@ export default function SessionPage() {
 
       setMessages(prev => [...prev, tutorMsg]);
 
+      const boardLines = cleanBoardLines(reply);
+
       boardApiRef.current?.clear?.();
-      boardApiRef.current?.writeLines?.(reply.split("\n"));
+      boardApiRef.current?.writeLines?.(boardLines);
 
     } catch {
 
@@ -82,7 +88,7 @@ export default function SessionPage() {
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
-      const chunks: BlobPart[] = [];
+      const chunks = [];
 
       mediaRecorder.ondataavailable = e => chunks.push(e.data);
 
@@ -136,13 +142,7 @@ export default function SessionPage() {
       </div>
 
       <SessionShell
-        tutor={
-          <TutorPanel
-            ref={tutorPanelRef}
-            messages={messages}
-            onSend={onSend}
-          />
-        }
+        tutor={<TutorPanel messages={messages} onSend={onSend} />}
         whiteboard={<WhiteboardPanel apiRef={boardApiRef} />}
         controls={<SessionControlBar />}
       />
