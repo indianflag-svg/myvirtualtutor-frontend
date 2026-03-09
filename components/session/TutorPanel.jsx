@@ -1,86 +1,72 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-export default function TutorPanel({ messages = [], onSend = () => {} }) {
-  const [text, setText] = React.useState("");
+export default function TutorPanel({ messages, onSend }) {
 
-  const send = (e) => {
-    if (e) e.preventDefault();   // 🔴 prevent page navigation
-    const t = text.trim();
-    if (!t) return;
-    onSend(t);
-    setText("");
+  const [input, setInput] = useState("");
+  const chatRef = useRef(null);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    onSend(input);
+    setInput("");
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: 14, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ fontSize: 14, fontWeight: 700 }}>AI Tutor</div>
-        <div style={{ fontSize: 12, opacity: 0.7 }}>Math • Grades 6–12</div>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
-      <div style={{ flex: 1, padding: 14, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
-        {messages.map((m) => (
-          <div key={m.id} style={{ textAlign: m.role === "user" ? "right" : "left" }}>
-            <div
-              style={{
-                display: "inline-block",
-                padding: "10px 12px",
-                borderRadius: 14,
-                background: m.role === "user"
-                  ? "rgba(255,255,255,0.12)"
-                  : "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                fontSize: 13,
-                whiteSpace: "pre-wrap"
-              }}
-            >
-              {m.content}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <form
-        onSubmit={send}
+      <div
+        ref={chatRef}
         style={{
-          padding: 12,
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          flex: 1,
+          overflowY: "auto",
+          padding: "1rem",
           display: "flex",
-          gap: 10
+          flexDirection: "column",
+          gap: "12px"
         }}
       >
+
+        {messages.map((m) => (
+          <div
+            key={m.id}
+            style={{
+              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
+              background: m.role === "user" ? "#e6f0ff" : "#f4f4f4",
+              padding: "10px 14px",
+              borderRadius: "10px",
+              maxWidth: "75%",
+              whiteSpace: "pre-wrap"
+            }}
+          >
+            {m.content}
+          </div>
+        ))}
+
+      </div>
+
+      <div style={{ display: "flex", borderTop: "1px solid #ddd", padding: "10px" }}>
         <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type your question…"
-          style={{
-            flex: 1,
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.04)",
-            color: "#e8eef6",
-            padding: "10px 12px",
-            fontSize: 13,
-            outline: "none",
+          style={{ flex: 1, padding: "8px" }}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a math question..."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSend();
           }}
         />
-        <button
-          type="submit"
-          style={{
-            padding: "10px 14px",
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.18)",
-            background: "rgba(255,255,255,0.10)",
-            color: "#e8eef6",
-            cursor: "pointer",
-            fontWeight: 700,
-          }}
-        >
+        <button onClick={handleSend} style={{ marginLeft: "8px" }}>
           Send
         </button>
-      </form>
+      </div>
+
     </div>
   );
 }
