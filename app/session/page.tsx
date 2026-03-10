@@ -16,15 +16,16 @@ export default function SessionPage() {
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const sendMessage = async () => {
+  async function sendMessage() {
+
     if (!input.trim()) return
 
-    const userMessage = input
+    const userText = input
     setInput("")
 
     setMessages(prev => [
       ...prev,
-      { role: "user", content: userMessage }
+      { role: "user", content: userText }
     ])
 
     setLoading(true)
@@ -37,7 +38,7 @@ export default function SessionPage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: userMessage
+          message: userText
         })
       })
 
@@ -60,28 +61,23 @@ export default function SessionPage() {
     setLoading(false)
   }
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") sendMessage()
-  }
-
   return (
-    <div style={{padding:"40px", maxWidth:"800px", margin:"auto"}}>
+
+    <div style={{padding:"40px",maxWidth:"800px",margin:"auto"}}>
 
       <h1>MyVirtualTutor</h1>
 
-      <div
-        style={{
-          border:"1px solid #ddd",
-          padding:"20px",
-          height:"400px",
-          overflowY:"auto",
-          marginBottom:"20px"
-        }}
-      >
+      <div style={{
+        border:"1px solid #ddd",
+        padding:"20px",
+        height:"400px",
+        overflowY:"auto",
+        marginBottom:"20px"
+      }}>
 
-        {messages.map((msg, i) => (
+        {messages.map((msg,i)=>(
           <div key={i} style={{marginBottom:"12px"}}>
-            <b>{msg.role === "user" ? "You" : "Tutor"}:</b> {msg.content}
+            <b>{msg.role==="user"?"You":"Tutor"}:</b> {msg.content}
           </div>
         ))}
 
@@ -93,27 +89,18 @@ export default function SessionPage() {
 
       </div>
 
-      <div style={{display:"flex", gap:"10px"}}>
+      <div style={{display:"flex",gap:"10px"}}>
 
         <input
           value={input}
           onChange={(e)=>setInput(e.target.value)}
-          onKeyDown={handleKeyPress}
           placeholder="Ask a math question..."
-          style={{
-            flex:1,
-            padding:"10px",
-            border:"1px solid #ccc"
-          }}
+          style={{flex:1,padding:"10px"}}
         />
 
         <button
           onClick={sendMessage}
-          style={{
-            padding:"10px 20px",
-            background:"#000",
-            color:"#fff"
-          }}
+          style={{padding:"10px 20px"}}
         >
           Send
         </button>
@@ -121,5 +108,6 @@ export default function SessionPage() {
       </div>
 
     </div>
+
   )
 }
