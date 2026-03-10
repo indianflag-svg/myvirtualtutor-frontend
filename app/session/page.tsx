@@ -52,7 +52,7 @@ export default function SessionPage() {
 
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: "Sorry — the tutor could not respond." }
+        { role: "assistant", content: "Tutor could not respond." }
       ])
 
     }
