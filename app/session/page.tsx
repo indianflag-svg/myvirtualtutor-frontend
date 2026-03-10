@@ -1,154 +1,125 @@
-"use client";
+"use client"
 
-import React, { useRef, useState } from "react";
-import SessionShell from "../../components/session/SessionShell";
-import WhiteboardPanel from "../../components/whiteboard/WhiteboardPanel";
-import TutorPanel from "../../components/session/TutorPanel";
-import SessionControlBar from "../../components/session/SessionControlBar";
+import { useState } from "react"
+
+const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage() {
 
-  const [messages, setMessages] = useState([]);
-  const [recording, setRecording] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: "Hi! I'm your math tutor. What problem would you like help with?"
+    }
+  ])
 
-  const boardApiRef = useRef(null);
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const API_BASE = "https://myvirtualtutor-backend-2.onrender.com";
+  const sendMessage = async () => {
+    if (!input.trim()) return
 
-  function cleanBoardLines(text) {
+    const userMessage = input
+    setInput("")
 
-    return text
-      .replace(/\\\[.*?\\\]/gs, "")      // remove LaTeX blocks
-      .replace(/\*\*/g, "")              // remove markdown bold
-      .replace(/#+/g, "")                // remove headings
-      .split("\n")
-      .map(l => l.trim())
-      .filter(l => l.length > 0)
-      .slice(0, 6);                      // limit lines on board
+    setMessages(prev => [
+      ...prev,
+      { role: "user", content: userMessage }
+    ])
 
-  }
-
-  const onSend = async (text) => {
-
-    if (!text || !text.trim()) return;
-
-    const userMsg = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: text
-    };
-
-    setMessages(prev => [...prev, userMsg]);
+    setLoading(true)
 
     try {
 
-      const res = await fetch(API_BASE + "/chat", {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
-      });
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userMessage
+        })
+      })
 
-      const data = await res.json();
-      const reply = data.reply || "Tutor error.";
-
-      const tutorMsg = {
-        id: crypto.randomUUID(),
-        role: "tutor",
-        content: reply
-      };
-
-      setMessages(prev => [...prev, tutorMsg]);
-
-      const boardLines = cleanBoardLines(reply);
-
-      boardApiRef.current?.clear?.();
-      boardApiRef.current?.writeLines?.(boardLines);
-
-    } catch {
+      const data = await res.json()
 
       setMessages(prev => [
         ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "tutor",
-          content: "Error contacting tutor server."
-        }
-      ]);
+        { role: "assistant", content: data.reply }
+      ])
+
+    } catch (err) {
+
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: "Sorry — the tutor could not respond." }
+      ])
 
     }
 
-  };
+    setLoading(false)
+  }
 
-  const startVoiceInput = async () => {
-
-    if (recording) return;
-    setRecording(true);
-
-    try {
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      const chunks = [];
-
-      mediaRecorder.ondataavailable = e => chunks.push(e.data);
-
-      mediaRecorder.onstop = async () => {
-
-        const blob = new Blob(chunks, { type: "audio/wav" });
-        const formData = new FormData();
-        formData.append("audio", blob, "speech.wav");
-
-        try {
-
-          const sttRes = await fetch(API_BASE + "/speech-to-text", {
-            method: "POST",
-            body: formData
-          });
-
-          const sttData = await sttRes.json();
-          setRecording(false);
-
-          if (!sttData.ok || !sttData.text) {
-            alert("Speech-to-text failed.");
-          } else {
-            onSend(sttData.text);
-          }
-
-        } catch {
-          alert("Speech processing error.");
-          setRecording(false);
-        }
-
-      };
-
-      mediaRecorder.start();
-      setTimeout(() => mediaRecorder.stop(), 10000);
-
-    } catch (e) {
-      alert("Microphone error: " + e);
-      setRecording(false);
-    }
-
-  };
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") sendMessage()
+  }
 
   return (
+    <div style={{padding:"40px", maxWidth:"800px", margin:"auto"}}>
 
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <h1>MyVirtualTutor</h1>
 
-      <div style={{ padding: "0.5rem", textAlign: "center", backgroundColor: "#f3f3f3" }}>
-        <button onClick={startVoiceInput} disabled={recording} style={{ fontSize: "1.2rem" }}>
-          {recording ? "Recording..." : "🎤 Speak"}
-        </button>
+      <div
+        style={{
+          border:"1px solid #ddd",
+          padding:"20px",
+          height:"400px",
+          overflowY:"auto",
+          marginBottom:"20px"
+        }}
+      >
+
+        {messages.map((msg, i) => (
+          <div key={i} style={{marginBottom:"12px"}}>
+            <b>{msg.role === "user" ? "You" : "Tutor"}:</b> {msg.content}
+          </div>
+        ))}
+
+        {loading && (
+          <div>
+            <b>Tutor:</b> thinking...
+          </div>
+        )}
+
       </div>
 
-      <SessionShell
-        tutor={<TutorPanel messages={messages} onSend={onSend} />}
-        whiteboard={<WhiteboardPanel apiRef={boardApiRef} />}
-        controls={<SessionControlBar />}
-      />
+      <div style={{display:"flex", gap:"10px"}}>
+
+        <input
+          value={input}
+          onChange={(e)=>setInput(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="Ask a math question..."
+          style={{
+            flex:1,
+            padding:"10px",
+            border:"1px solid #ccc"
+          }}
+        />
+
+        <button
+          onClick={sendMessage}
+          style={{
+            padding:"10px 20px",
+            background:"#000",
+            color:"#fff"
+          }}
+        >
+          Send
+        </button>
+
+      </div>
 
     </div>
-
-  );
-
+  )
 }
