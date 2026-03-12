@@ -54,6 +54,8 @@ export default function SessionPage() {
 
     } catch (err) {
 
+      console.error(err)
+
       setMessages(prev => [
         ...prev,
         {
@@ -103,9 +105,6 @@ export default function SessionPage() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendMessage()
-          }}
           placeholder="Ask a math question..."
           style={{
             flex: 1,
