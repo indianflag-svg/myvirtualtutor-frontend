@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-const API_BASE = "https://myvirtualtutor-backend.onrender.com"
+const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage() {
 
@@ -20,12 +20,12 @@ export default function SessionPage() {
 
     if (!input.trim()) return
 
-    const userText = input
+    const userMessage = input
     setInput("")
 
     setMessages(prev => [
       ...prev,
-      { role: "user", content: userText }
+      { role: "user", content: userMessage }
     ])
 
     setLoading(true)
@@ -38,7 +38,7 @@ export default function SessionPage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: userText
+          message: userMessage
         })
       })
 
@@ -46,14 +46,20 @@ export default function SessionPage() {
 
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: data.reply }
+        {
+          role: "assistant",
+          content: data.reply || "Tutor returned no response."
+        }
       ])
 
     } catch (err) {
 
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: "Tutor could not respond." }
+        {
+          role: "assistant",
+          content: "Tutor could not respond."
+        }
       ])
 
     }
@@ -62,22 +68,25 @@ export default function SessionPage() {
   }
 
   return (
-
-    <div style={{padding:"40px",maxWidth:"800px",margin:"auto"}}>
+    <div style={{
+      maxWidth: "800px",
+      margin: "auto",
+      padding: "40px"
+    }}>
 
       <h1>MyVirtualTutor</h1>
 
       <div style={{
-        border:"1px solid #ddd",
-        padding:"20px",
-        height:"400px",
-        overflowY:"auto",
-        marginBottom:"20px"
+        border: "1px solid #ddd",
+        height: "400px",
+        overflowY: "auto",
+        padding: "20px",
+        marginBottom: "20px"
       }}>
 
-        {messages.map((msg,i)=>(
-          <div key={i} style={{marginBottom:"12px"}}>
-            <b>{msg.role==="user"?"You":"Tutor"}:</b> {msg.content}
+        {messages.map((m, i) => (
+          <div key={i} style={{ marginBottom: "12px" }}>
+            <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.content}
           </div>
         ))}
 
@@ -89,18 +98,29 @@ export default function SessionPage() {
 
       </div>
 
-      <div style={{display:"flex",gap:"10px"}}>
+      <div style={{ display: "flex", gap: "10px" }}>
 
         <input
           value={input}
-          onChange={(e)=>setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") sendMessage()
+          }}
           placeholder="Ask a math question..."
-          style={{flex:1,padding:"10px"}}
+          style={{
+            flex: 1,
+            padding: "10px",
+            border: "1px solid #ccc"
+          }}
         />
 
         <button
           onClick={sendMessage}
-          style={{padding:"10px 20px"}}
+          style={{
+            padding: "10px 20px",
+            background: "black",
+            color: "white"
+          }}
         >
           Send
         </button>
@@ -108,6 +128,5 @@ export default function SessionPage() {
       </div>
 
     </div>
-
   )
 }
