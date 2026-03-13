@@ -48,13 +48,11 @@ export default function SessionPage() {
         ...prev,
         {
           role: "assistant",
-          content: data.reply || "Tutor returned no response."
+          content: data.reply ? data.reply : "Tutor returned no response."
         }
       ])
 
     } catch (err) {
-
-      console.error(err)
 
       setMessages(prev => [
         ...prev,
@@ -105,6 +103,9 @@ export default function SessionPage() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") sendMessage()
+          }}
           placeholder="Ask a math question..."
           style={{
             flex: 1,
