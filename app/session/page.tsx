@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-const API_BASE = "https://myvirtualtutor-backend.onrender.com"
+const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage() {
 
