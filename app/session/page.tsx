@@ -48,7 +48,17 @@ export default function SessionPage() {
 
       const data = await res.json()
 
-      typeWriter(data.reply)
+      if (data.steps) {
+
+        const stepsText = data.steps
+          .map((step, i) => `**Step ${i + 1}**\n${step}`)
+          .join("\n\n")
+
+        typeWriter(stepsText)
+
+      } else {
+        typeWriter("Tutor could not generate steps.")
+      }
 
     } catch (err) {
 
@@ -65,7 +75,7 @@ export default function SessionPage() {
     setLoading(false)
   }
 
-  function typeWriter(text:string){
+  function typeWriter(text){
 
     let index = 0
 
