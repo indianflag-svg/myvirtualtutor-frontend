@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import UploadButton from "../../components/UploadButton"
 
 const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage() {
 
   const [chat, setChat] = useState([
-    { role:"assistant", text:"Hi! I'm your math tutor. Ask me a math problem." }
+    { role:"assistant", text:"Hi! I'm your math tutor. Ask me a math problem or upload homework." }
   ])
 
   const [steps, setSteps] = useState([])
@@ -76,6 +77,17 @@ export default function SessionPage() {
       }, index*1200)
 
     })
+
+  }
+
+  function handleUploadSteps(uploadSteps){
+
+    setChat(prev=>[
+      ...prev,
+      { role:"assistant", text:"I read the homework. Let's solve it." }
+    ])
+
+    animateSteps(uploadSteps)
 
   }
 
@@ -150,6 +162,10 @@ export default function SessionPage() {
             Send
           </button>
 
+        </div>
+
+        <div style={{padding:"15px"}}>
+          <UploadButton onUpload={handleUploadSteps} />
         </div>
 
       </div>
