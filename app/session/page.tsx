@@ -1,10 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import ReactMarkdown from "react-markdown"
-import remarkMath from "remark-math"
-import rehypeKatex from "rehype-katex"
-import "katex/dist/katex.min.css"
 
 const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
@@ -13,7 +9,7 @@ export default function SessionPage() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hi! I'm your math tutor. What problem would you like help with?"
+      steps: ["Hi! I'm your math tutor. What problem would you like help with?"]
     }
   ])
 
@@ -29,7 +25,7 @@ export default function SessionPage() {
 
     setMessages(prev => [
       ...prev,
-      { role: "user", content: userMessage }
+      { role: "user", text: userMessage }
     ])
 
     setLoading(true)
@@ -48,25 +44,15 @@ export default function SessionPage() {
 
       const data = await res.json()
 
-      if (data.steps) {
+      animateSteps(data.steps || ["Tutor could not generate steps."])
 
-        const stepsText = data.steps
-          .map((step, i) => `**Step ${i + 1}**\n${step}`)
-          .join("\n\n")
-
-        typeWriter(stepsText)
-
-      } else {
-        typeWriter("Tutor could not generate steps.")
-      }
-
-    } catch (err) {
+    } catch {
 
       setMessages(prev => [
         ...prev,
         {
           role: "assistant",
-          content: "Tutor could not respond."
+          steps: ["Tutor could not respond."]
         }
       ])
 
@@ -75,35 +61,30 @@ export default function SessionPage() {
     setLoading(false)
   }
 
-  function typeWriter(text){
+  function animateSteps(steps){
 
-    let index = 0
+    let visibleSteps = []
 
     setMessages(prev => [
       ...prev,
-      { role: "assistant", content: "" }
+      { role: "assistant", steps: [] }
     ])
 
-    const interval = setInterval(()=>{
+    steps.forEach((step, index)=>{
 
-      index++
+      setTimeout(()=>{
 
-      setMessages(prev=>{
-        const last = prev[prev.length-1]
+        visibleSteps.push(step)
 
-        const updated = {
-          ...last,
-          content: text.slice(0,index)
-        }
+        setMessages(prev=>{
+          const last = prev[prev.length-1]
+          const updated = { ...last, steps: [...visibleSteps] }
+          return [...prev.slice(0,-1), updated]
+        })
 
-        return [...prev.slice(0,-1),updated]
-      })
+      }, index * 1200)
 
-      if(index >= text.length){
-        clearInterval(interval)
-      }
-
-    },20)
+    })
 
   }
 
@@ -125,17 +106,34 @@ export default function SessionPage() {
       }}>
 
         {messages.map((m, i) => (
-          <div key={i} style={{ marginBottom: "12px" }}>
+
+          <div key={i} style={{ marginBottom: "16px" }}>
+
             <b>{m.role === "user" ? "You" : "Tutor"}:</b>
 
-            <ReactMarkdown
-              remarkPlugins={[remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-            >
-              {m.content}
-            </ReactMarkdown>
+            {m.role === "user" && (
+              <div>{m.text}</div>
+            )}
+
+            {m.role === "assistant" && m.steps && (
+
+              <div style={{ marginTop: "8px" }}>
+
+                {m.steps.map((step, s)=>(
+                  <div key={s} style={{
+                    padding:"6px 0",
+                    fontSize:"18px"
+                  }}>
+                    {step}
+                  </div>
+                ))}
+
+              </div>
+
+            )}
 
           </div>
+
         ))}
 
         {loading && (
@@ -150,24 +148,24 @@ export default function SessionPage() {
 
         <input
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendMessage()
+          onChange={(e)=>setInput(e.target.value)}
+          onKeyDown={(e)=>{
+            if(e.key==="Enter") sendMessage()
           }}
           placeholder="Ask a math question..."
           style={{
-            flex: 1,
-            padding: "10px",
-            border: "1px solid #ccc"
+            flex:1,
+            padding:"10px",
+            border:"1px solid #ccc"
           }}
         />
 
         <button
           onClick={sendMessage}
           style={{
-            padding: "10px 20px",
-            background: "black",
-            color: "white"
+            padding:"10px 20px",
+            background:"black",
+            color:"white"
           }}
         >
           Send
