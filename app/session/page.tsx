@@ -18,6 +18,9 @@ export default function SessionPage() {
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const [answerInput, setAnswerInput] = useState("")
+  const [feedback, setFeedback] = useState("")
+
   async function sendMessage(){
 
     if(!input.trim()) return
@@ -51,6 +54,9 @@ export default function SessionPage() {
       setSteps([receivedSteps[0]])
       setStepIndex(1)
 
+      setAnswerInput("")
+      setFeedback("")
+
       setChat(prev=>[
         ...prev,
         { role:"assistant", text:"Let's solve this step-by-step." }
@@ -79,6 +85,8 @@ export default function SessionPage() {
     ])
 
     setStepIndex(stepIndex + 1)
+    setAnswerInput("")
+    setFeedback("")
 
   }
 
@@ -88,10 +96,37 @@ export default function SessionPage() {
     setSteps([uploadSteps[0]])
     setStepIndex(1)
 
+    setAnswerInput("")
+    setFeedback("")
+
     setChat(prev=>[
       ...prev,
       { role:"assistant", text:"I read the homework. Let's solve it." }
     ])
+
+  }
+
+  function checkAnswer(){
+
+    const currentStep = steps[steps.length-1]
+
+    const correctStep = allSteps.find(s => s.includes("=") && !s.includes("?"))
+
+    if(!correctStep){
+      setFeedback("Try again.")
+      return
+    }
+
+    const correctAnswer = correctStep.split("=").pop().trim()
+
+    if(answerInput.trim() === correctAnswer){
+      setFeedback("Correct! ✅")
+      setTimeout(()=>{
+        nextStep()
+      },1000)
+    }else{
+      setFeedback("Not quite. Hint: think about the numbers in the problem.")
+    }
 
   }
 
@@ -101,6 +136,7 @@ export default function SessionPage() {
   const currentText = steps[steps.length-1] || ""
 
   const isHomeworkProblem = currentText.startsWith("Problem")
+  const isQuestionStep = currentText.includes("= ?")
 
   function cleanProblemText(text){
     if(text.startsWith("Problem")){
@@ -227,7 +263,40 @@ export default function SessionPage() {
 
         </div>
 
-        {stepIndex < allSteps.length && (
+        {isQuestionStep && (
+
+          <div style={{marginTop:"20px"}}>
+
+            <input
+              value={answerInput}
+              onChange={(e)=>setAnswerInput(e.target.value)}
+              placeholder="Type your answer"
+              style={{padding:"10px", fontSize:"16px"}}
+            />
+
+            <button
+              onClick={checkAnswer}
+              style={{
+                marginLeft:"10px",
+                padding:"10px 18px",
+                background:"black",
+                color:"white"
+              }}
+            >
+              Check Answer
+            </button>
+
+            {feedback && (
+              <div style={{marginTop:"10px", fontWeight:"bold"}}>
+                {feedback}
+              </div>
+            )}
+
+          </div>
+
+        )}
+
+        {!isQuestionStep && stepIndex < allSteps.length && (
 
           <button
             onClick={nextStep}
