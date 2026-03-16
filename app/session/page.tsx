@@ -98,6 +98,10 @@ export default function SessionPage() {
   const currentStepNumber = steps.length
   const totalSteps = allSteps.length
 
+  const currentText = steps[steps.length-1] || ""
+
+  const isHomeworkProblem = currentText.startsWith("Problem")
+
   return (
 
     <div style={{
@@ -191,7 +195,9 @@ export default function SessionPage() {
             marginBottom:"10px",
             fontWeight:"bold"
           }}>
-            Step {currentStepNumber} of {totalSteps}
+            {isHomeworkProblem
+              ? `Problem ${currentStepNumber} of ${totalSteps}`
+              : `Step ${currentStepNumber} of ${totalSteps}`}
           </div>
 
         )}
