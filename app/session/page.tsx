@@ -175,7 +175,9 @@ return(
 <input
 value={input}
 onChange={e=>setInput(e.target.value)}
-onKeyDown={e=>{if(e.key==="Enter")sendMessage()}}
+onKeyDown={e=>{
+if(e.key==="Enter" && !isQuestion) sendMessage()
+}}
 placeholder="Ask a math question..."
 style={{flex:1,padding:"10px"}}
 />
