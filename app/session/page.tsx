@@ -85,6 +85,7 @@ export default function SessionPage() {
     ])
 
     setStepIndex(stepIndex + 1)
+
     setAnswerInput("")
     setFeedback("")
 
@@ -108,24 +109,27 @@ export default function SessionPage() {
 
   function checkAnswer(){
 
-    const currentStep = steps[steps.length-1]
+    const nextStepText = allSteps[stepIndex] || ""
 
-    const correctStep = allSteps.find(s => s.includes("=") && !s.includes("?"))
-
-    if(!correctStep){
+    if(!nextStepText.includes("=")){
       setFeedback("Try again.")
       return
     }
 
-    const correctAnswer = correctStep.split("=").pop().trim()
+    const correctAnswer = nextStepText.split("=").pop().trim()
 
     if(answerInput.trim() === correctAnswer){
+
       setFeedback("Correct! ✅")
+
       setTimeout(()=>{
         nextStep()
       },1000)
+
     }else{
+
       setFeedback("Not quite. Hint: think about the numbers in the problem.")
+
     }
 
   }
