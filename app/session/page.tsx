@@ -21,6 +21,16 @@ export default function SessionPage() {
   const [answerInput, setAnswerInput] = useState("")
   const [feedback, setFeedback] = useState("")
 
+  function filterSteps(rawSteps){
+
+    return rawSteps.filter(step => {
+      if(!step) return false
+      if(step.startsWith("Original Problem")) return false
+      return true
+    })
+
+  }
+
   async function sendMessage(){
 
     if(!input.trim()) return
@@ -48,7 +58,7 @@ export default function SessionPage() {
 
       const data = await res.json()
 
-      const receivedSteps = data.steps || []
+      const receivedSteps = filterSteps(data.steps || [])
 
       setAllSteps(receivedSteps)
       setSteps([receivedSteps[0]])
@@ -93,8 +103,10 @@ export default function SessionPage() {
 
   function handleUploadSteps(uploadSteps){
 
-    setAllSteps(uploadSteps)
-    setSteps([uploadSteps[0]])
+    const filtered = filterSteps(uploadSteps)
+
+    setAllSteps(filtered)
+    setSteps([filtered[0]])
     setStepIndex(1)
 
     setAnswerInput("")
@@ -112,13 +124,7 @@ export default function SessionPage() {
     for(let step of allSteps){
 
       if(step.includes("=") && !step.includes("?")){
-
-        const answer = step.split("=").pop().trim()
-
-        if(answer !== ""){
-          return answer
-        }
-
+        return step.split("=").pop().trim()
       }
 
     }
@@ -157,21 +163,7 @@ export default function SessionPage() {
 
   const currentText = steps[steps.length-1] || ""
 
-  const isHomeworkProblem = currentText.startsWith("Problem")
   const isQuestionStep = currentText.includes("= ?")
-
-  function cleanProblemText(text){
-
-    if(text.startsWith("Problem")){
-      const colonIndex = text.indexOf(":")
-      if(colonIndex !== -1){
-        return text.substring(colonIndex+1).trim()
-      }
-    }
-
-    return text
-
-  }
 
   return (
 
@@ -266,9 +258,7 @@ export default function SessionPage() {
             marginBottom:"10px",
             fontWeight:"bold"
           }}>
-            {isHomeworkProblem
-              ? `Problem ${currentStepNumber} of ${totalSteps}`
-              : `Step ${currentStepNumber} of ${totalSteps}`}
+            Step {currentStepNumber} of {totalSteps}
           </div>
 
         )}
@@ -282,7 +272,7 @@ export default function SessionPage() {
 
           {steps.map((s,i)=>(
             <div key={i} style={{marginBottom:"18px"}}>
-              {cleanProblemText(s)}
+              {s}
             </div>
           ))}
 
