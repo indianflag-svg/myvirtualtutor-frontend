@@ -107,16 +107,34 @@ export default function SessionPage() {
 
   }
 
+  function getCorrectAnswer(){
+
+    for(let step of allSteps){
+
+      if(step.includes("=") && !step.includes("?")){
+
+        const answer = step.split("=").pop().trim()
+
+        if(answer !== ""){
+          return answer
+        }
+
+      }
+
+    }
+
+    return null
+
+  }
+
   function checkAnswer(){
 
-    const nextStepText = allSteps[stepIndex] || ""
+    const correctAnswer = getCorrectAnswer()
 
-    if(!nextStepText.includes("=")){
+    if(!correctAnswer){
       setFeedback("Try again.")
       return
     }
-
-    const correctAnswer = nextStepText.split("=").pop().trim()
 
     if(answerInput.trim() === correctAnswer){
 
