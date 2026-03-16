@@ -3,15 +3,11 @@
 export const dynamic = "force-dynamic"
 
 import { useState,useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 import UploadButton from "../../components/UploadButton"
 
 const API_BASE="https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage(){
-
-const searchParams = useSearchParams()
-const urlProblem = searchParams.get("problem")
 
 const [chat,setChat]=useState([
 {role:"assistant",text:"Hi! I'm your math tutor. Ask a problem or upload homework."}
@@ -85,10 +81,15 @@ solveProblem(userMessage)
 }
 
 useEffect(()=>{
-if(urlProblem){
-solveProblem(urlProblem)
+
+const params = new URLSearchParams(window.location.search)
+const problem = params.get("problem")
+
+if(problem){
+solveProblem(problem)
 }
-},[urlProblem])
+
+},[])
 
 function nextStep(){
 if(stepIndex>=allSteps.length)return
@@ -116,7 +117,6 @@ setChat(prev=>[
 
 const currentStepNumber=steps.length
 const totalSteps=allSteps.length
-const currentText=steps[steps.length-1]||""
 
 function cleanProblemText(text){
 if(text.startsWith("Problem")){
