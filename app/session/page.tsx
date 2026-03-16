@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import UploadButton from "../../components/UploadButton"
 
-const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
+const API_BASE="https://myvirtualtutor-backend-2.onrender.com"
 
 export default function SessionPage(){
 
@@ -76,18 +76,6 @@ setLoading(false)
 
 }
 
-function nextStep(){
-
-if(stepIndex>=allSteps.length)return
-
-setSteps(prev=>[...prev,allSteps[stepIndex]])
-setStepIndex(stepIndex+1)
-
-setAnswerInput("")
-setFeedback("")
-
-}
-
 function handleUploadSteps(uploadSteps){
 
 const filtered=filterSteps(uploadSteps)
@@ -95,9 +83,6 @@ const filtered=filterSteps(uploadSteps)
 setAllSteps(filtered)
 setSteps([filtered[0]])
 setStepIndex(1)
-
-setAnswerInput("")
-setFeedback("")
 
 setChat(prev=>[
 ...prev,
@@ -137,7 +122,9 @@ if(answerInput.trim()===correct){
 
 setFeedback("Correct! ✅")
 
-setTimeout(()=>{nextStep()},900)
+setTimeout(()=>{
+nextStep()
+},1000)
 
 }else{
 
@@ -147,8 +134,31 @@ setFeedback("Not quite. Hint: think about the numbers.")
 
 }
 
+function nextStep(){
+
+if(stepIndex>=allSteps.length)return
+
+setSteps(prev=>[...prev,allSteps[stepIndex]])
+setStepIndex(prev=>prev+1)
+
+}
+
 const currentText=steps[steps.length-1]||""
 const isQuestion=currentText.includes("= ?")
+
+useEffect(()=>{
+
+if(!isQuestion && stepIndex<allSteps.length){
+
+const timer=setTimeout(()=>{
+nextStep()
+},1200)
+
+return ()=>clearTimeout(timer)
+
+}
+
+},[stepIndex,isQuestion])
 
 return(
 
@@ -197,16 +207,30 @@ Send
 
 </div>
 
-<div style={{flex:1,background:"#fff",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+<div style={{
+flex:1,
+background:"#ffffff",
+display:"flex",
+flexDirection:"column",
+alignItems:"center",
+justifyContent:"center"
+}}>
 
 <div style={{fontSize:"18px",marginBottom:"10px",fontWeight:"bold"}}>
 Step {steps.length} of {allSteps.length}
 </div>
 
-<div style={{width:"80%",maxWidth:"700px",fontSize:"28px",lineHeight:"1.8"}}>
+<div style={{
+width:"80%",
+maxWidth:"700px",
+fontSize:"30px",
+lineHeight:"1.8"
+}}>
 
 {steps.map((s,i)=>(
-<div key={i} style={{marginBottom:"18px"}}>{s}</div>
+<div key={i} style={{marginBottom:"16px"}}>
+{s}
+</div>
 ))}
 
 </div>
@@ -224,27 +248,23 @@ style={{padding:"10px",fontSize:"16px"}}
 
 <button
 onClick={checkAnswer}
-style={{marginLeft:"10px",padding:"10px 18px",background:"black",color:"white"}}
+style={{
+marginLeft:"10px",
+padding:"10px 18px",
+background:"black",
+color:"white"
+}}
 >
 Check Answer
 </button>
 
 {feedback&&(
-<div style={{marginTop:"10px",fontWeight:"bold"}}>{feedback}</div>
+<div style={{marginTop:"10px",fontWeight:"bold"}}>
+{feedback}
+</div>
 )}
 
 </div>
-
-)}
-
-{!isQuestion&&stepIndex<allSteps.length&&(
-
-<button
-onClick={nextStep}
-style={{marginTop:"20px",padding:"12px 24px",fontSize:"16px",background:"black",color:"white",border:"none"}}
->
-Next Step
-</button>
 
 )}
 
