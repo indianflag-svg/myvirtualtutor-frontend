@@ -143,13 +143,16 @@ export default function SessionPage() {
   const isQuestionStep = currentText.includes("= ?")
 
   function cleanProblemText(text){
+
     if(text.startsWith("Problem")){
-      const parts = text.split(":")
-      if(parts.length > 1){
-        return parts.slice(1).join(":").trim()
+      const colonIndex = text.indexOf(":")
+      if(colonIndex !== -1){
+        return text.substring(colonIndex+1).trim()
       }
     }
+
     return text
+
   }
 
   return (
