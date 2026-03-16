@@ -102,6 +102,16 @@ export default function SessionPage() {
 
   const isHomeworkProblem = currentText.startsWith("Problem")
 
+  function cleanProblemText(text){
+    if(text.startsWith("Problem")){
+      const parts = text.split(":")
+      if(parts.length > 1){
+        return parts.slice(1).join(":").trim()
+      }
+    }
+    return text
+  }
+
   return (
 
     <div style={{
@@ -211,7 +221,7 @@ export default function SessionPage() {
 
           {steps.map((s,i)=>(
             <div key={i} style={{marginBottom:"18px"}}>
-              {s}
+              {cleanProblemText(s)}
             </div>
           ))}
 
