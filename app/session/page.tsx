@@ -63,7 +63,7 @@ export default function SessionPage() {
 
   function animateSteps(stepList){
 
-    setSteps([])
+    
 
     stepList.forEach((step,index)=>{
 
