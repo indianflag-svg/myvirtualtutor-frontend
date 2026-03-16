@@ -27,7 +27,7 @@ export default function SessionPage(){
     const userMessage = input
     setInput("")
 
-    setMessages(prev => [
+    setMessages(prev=>[
       ...prev,
       {role:"user",content:userMessage}
     ])
@@ -65,28 +65,36 @@ export default function SessionPage(){
     setLoading(false)
   }
 
-  function animateSteps(steps){
+  function animateSteps(steps:string[]){
 
-    let i = 0
+    let index = 0
+
+    setMessages(prev=>[
+      ...prev,
+      {role:"assistant",content:""}
+    ])
 
     const interval = setInterval(()=>{
 
-      if(i >= steps.length){
+      if(index >= steps.length){
         clearInterval(interval)
         return
       }
 
-      setMessages(prev=>[
-        ...prev,
-        {
-          role:"assistant",
-          content:steps[i]
+      setMessages(prev=>{
+        const last = prev[prev.length-1]
+
+        const updated = {
+          ...last,
+          content: steps.slice(0,index+1).join("\n")
         }
-      ])
 
-      i++
+        return [...prev.slice(0,-1),updated]
+      })
 
-    },1200)
+      index++
+
+    },1000)
 
   }
 
@@ -110,7 +118,6 @@ export default function SessionPage(){
 
         {messages.map((m,i)=>(
           <div key={i} style={{marginBottom:"12px"}}>
-
             <b>{m.role === "user" ? "You" : "Tutor"}:</b>
 
             <ReactMarkdown
