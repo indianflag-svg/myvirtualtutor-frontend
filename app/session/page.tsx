@@ -63,7 +63,7 @@ export default function SessionPage() {
           ...prev,
           step
         ])
-      }, index * 900)
+      }, index * 1500)
     })
   }
 
