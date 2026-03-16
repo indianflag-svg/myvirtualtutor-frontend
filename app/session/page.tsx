@@ -5,323 +5,251 @@ import UploadButton from "../../components/UploadButton"
 
 const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
-export default function SessionPage() {
+export default function SessionPage(){
 
-  const [chat, setChat] = useState([
-    { role:"assistant", text:"Hi! I'm your math tutor. Ask me a math problem or upload homework." }
-  ])
+const [chat,setChat]=useState([
+{role:"assistant",text:"Hi! I'm your math tutor. Ask a problem or upload homework."}
+])
 
-  const [allSteps, setAllSteps] = useState([])
-  const [steps, setSteps] = useState([])
-  const [stepIndex, setStepIndex] = useState(0)
+const [allSteps,setAllSteps]=useState([])
+const [steps,setSteps]=useState([])
+const [stepIndex,setStepIndex]=useState(0)
 
-  const [input, setInput] = useState("")
-  const [loading, setLoading] = useState(false)
+const [input,setInput]=useState("")
+const [loading,setLoading]=useState(false)
 
-  const [answerInput, setAnswerInput] = useState("")
-  const [feedback, setFeedback] = useState("")
+const [answerInput,setAnswerInput]=useState("")
+const [feedback,setFeedback]=useState("")
 
-  function filterSteps(rawSteps){
+function filterSteps(raw){
+return raw.filter(s=>{
+if(!s)return false
+if(s.startsWith("Original Problem"))return false
+return true
+})
+}
 
-    return rawSteps.filter(step => {
-      if(!step) return false
-      if(step.startsWith("Original Problem")) return false
-      return true
-    })
+async function sendMessage(){
 
-  }
+if(!input.trim())return
 
-  async function sendMessage(){
+const userMessage=input
+setInput("")
 
-    if(!input.trim()) return
+setChat(prev=>[...prev,{role:"user",text:userMessage}])
+setLoading(true)
 
-    const userMessage = input
-    setInput("")
+try{
 
-    setChat(prev=>[
-      ...prev,
-      { role:"user", text:userMessage }
-    ])
+const res=await fetch(`${API_BASE}/chat`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:userMessage,session_id:"default"})
+})
 
-    setLoading(true)
+const data=await res.json()
 
-    try{
+const received=filterSteps(data.steps||[])
 
-      const res = await fetch(`${API_BASE}/chat`,{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          message:userMessage,
-          session_id:"default"
-        })
-      })
+setAllSteps(received)
+setSteps([received[0]])
+setStepIndex(1)
 
-      const data = await res.json()
+setAnswerInput("")
+setFeedback("")
 
-      const receivedSteps = filterSteps(data.steps || [])
+setChat(prev=>[
+...prev,
+{role:"assistant",text:"Let's solve this step-by-step."}
+])
 
-      setAllSteps(receivedSteps)
-      setSteps([receivedSteps[0]])
-      setStepIndex(1)
+}catch{
 
-      setAnswerInput("")
-      setFeedback("")
+setChat(prev=>[
+...prev,
+{role:"assistant",text:"Tutor had trouble solving that."}
+])
 
-      setChat(prev=>[
-        ...prev,
-        { role:"assistant", text:"Let's solve this step-by-step." }
-      ])
+}
 
-    }catch{
+setLoading(false)
 
-      setChat(prev=>[
-        ...prev,
-        { role:"assistant", text:"Tutor had trouble solving that." }
-      ])
+}
 
-    }
+function nextStep(){
 
-    setLoading(false)
+if(stepIndex>=allSteps.length)return
 
-  }
+setSteps(prev=>[...prev,allSteps[stepIndex]])
+setStepIndex(stepIndex+1)
 
-  function nextStep(){
+setAnswerInput("")
+setFeedback("")
 
-    if(stepIndex >= allSteps.length) return
+}
 
-    setSteps(prev=>[
-      ...prev,
-      allSteps[stepIndex]
-    ])
+function handleUploadSteps(uploadSteps){
 
-    setStepIndex(stepIndex + 1)
+const filtered=filterSteps(uploadSteps)
 
-    setAnswerInput("")
-    setFeedback("")
+setAllSteps(filtered)
+setSteps([filtered[0]])
+setStepIndex(1)
 
-  }
+setAnswerInput("")
+setFeedback("")
 
-  function extractAnswer(){
+setChat(prev=>[
+...prev,
+{role:"assistant",text:"Homework uploaded. Let's solve it."}
+])
 
-    for(let step of allSteps){
+}
 
-      if(step.includes("=") && !step.includes("?")){
+function extractAnswer(){
 
-        const match = step.match(/[-]?\d+(\.\d+)?$/)
+for(let step of allSteps){
 
-        if(match){
-          return match[0]
-        }
+if(step.includes("=")&&!step.includes("?")){
 
-      }
+const match=step.match(/[-]?\d+(\.\d+)?$/)
 
-    }
+if(match)return match[0]
 
-    return null
+}
 
-  }
+}
 
-  function checkAnswer(){
+return null
 
-    const correctAnswer = extractAnswer()
+}
 
-    if(!correctAnswer){
-      setFeedback("Try again.")
-      return
-    }
+function checkAnswer(){
 
-    if(answerInput.trim() === correctAnswer){
+const correct=extractAnswer()
 
-      setFeedback("Correct! ✅")
+if(!correct){
+setFeedback("Try again.")
+return
+}
 
-      setTimeout(()=>{
-        nextStep()
-      },1000)
+if(answerInput.trim()===correct){
 
-    }else{
+setFeedback("Correct! ✅")
 
-      setFeedback("Not quite. Hint: think about the numbers in the problem.")
+setTimeout(()=>{nextStep()},900)
 
-    }
+}else{
 
-  }
+setFeedback("Not quite. Hint: think about the numbers.")
 
-  const currentStepNumber = steps.length
-  const totalSteps = allSteps.length
+}
 
-  const currentText = steps[steps.length-1] || ""
+}
 
-  const isQuestionStep = currentText.includes("= ?")
+const currentText=steps[steps.length-1]||""
+const isQuestion=currentText.includes("= ?")
 
-  return (
+return(
 
-    <div style={{
-      display:"flex",
-      height:"100vh",
-      fontFamily:"sans-serif"
-    }}>
+<div style={{display:"flex",height:"100vh",fontFamily:"sans-serif"}}>
 
-      <div style={{
-        width:"35%",
-        borderRight:"1px solid #ddd",
-        display:"flex",
-        flexDirection:"column"
-      }}>
+<div style={{width:"35%",borderRight:"1px solid #ddd",display:"flex",flexDirection:"column"}}>
 
-        <div style={{
-          padding:"20px",
-          fontWeight:"bold"
-        }}>
-          MyVirtualTutor
-        </div>
+<div style={{padding:"20px",fontWeight:"bold"}}>MyVirtualTutor</div>
 
-        <div style={{
-          flex:1,
-          overflowY:"auto",
-          padding:"20px"
-        }}>
+<div style={{flex:1,overflowY:"auto",padding:"20px"}}>
 
-          {chat.map((m,i)=>(
-            <div key={i} style={{marginBottom:"12px"}}>
-              <b>{m.role==="user"?"You":"Tutor"}:</b> {m.text}
-            </div>
-          ))}
-
-          {loading && <div>Tutor is thinking...</div>}
-
-        </div>
-
-        <div style={{
-          padding:"15px",
-          borderTop:"1px solid #ddd",
-          display:"flex",
-          gap:"10px"
-        }}>
-
-          <input
-            value={input}
-            onChange={(e)=>setInput(e.target.value)}
-            onKeyDown={(e)=>{
-              if(e.key==="Enter") sendMessage()
-            }}
-            placeholder="Ask a math question..."
-            style={{
-              flex:1,
-              padding:"10px"
-            }}
-          />
-
-          <button
-            onClick={sendMessage}
-            style={{
-              padding:"10px 18px",
-              background:"black",
-              color:"white"
-            }}
-          >
-            Send
-          </button>
-
-        </div>
-
-        <div style={{padding:"15px"}}>
-          <UploadButton onUpload={handleUploadSteps} />
-        </div>
-
-      </div>
-
-      <div style={{
-        flex:1,
-        background:"#ffffff",
-        display:"flex",
-        flexDirection:"column",
-        alignItems:"center",
-        justifyContent:"center"
-      }}>
-
-        {totalSteps > 0 && (
-
-          <div style={{
-            fontSize:"18px",
-            marginBottom:"10px",
-            fontWeight:"bold"
-          }}>
-            Step {currentStepNumber} of {totalSteps}
-          </div>
-
-        )}
-
-        <div style={{
-          width:"80%",
-          maxWidth:"700px",
-          fontSize:"28px",
-          lineHeight:"1.8"
-        }}>
-
-          {steps.map((s,i)=>(
-            <div key={i} style={{marginBottom:"18px"}}>
-              {s}
-            </div>
-          ))}
-
-        </div>
-
-        {isQuestionStep && (
-
-          <div style={{marginTop:"20px"}}>
-
-            <input
-              value={answerInput}
-              onChange={(e)=>setAnswerInput(e.target.value)}
-              placeholder="Type your answer"
-              style={{padding:"10px", fontSize:"16px"}}
-            />
-
-            <button
-              onClick={checkAnswer}
-              style={{
-                marginLeft:"10px",
-                padding:"10px 18px",
-                background:"black",
-                color:"white"
-              }}
-            >
-              Check Answer
-            </button>
-
-            {feedback && (
-              <div style={{marginTop:"10px", fontWeight:"bold"}}>
-                {feedback}
-              </div>
-            )}
-
-          </div>
-
-        )}
-
-        {!isQuestionStep && stepIndex < allSteps.length && (
-
-          <button
-            onClick={nextStep}
-            style={{
-              marginTop:"20px",
-              padding:"12px 24px",
-              fontSize:"16px",
-              background:"black",
-              color:"white",
-              border:"none",
-              cursor:"pointer"
-            }}
-          >
-            Next Step
-          </button>
-
-        )}
-
-      </div>
-
-    </div>
-
-  )
+{chat.map((m,i)=>(
+<div key={i} style={{marginBottom:"12px"}}>
+<b>{m.role==="user"?"You":"Tutor"}:</b> {m.text}
+</div>
+))}
+
+{loading&&<div>Tutor is thinking...</div>}
+
+</div>
+
+<div style={{padding:"15px",borderTop:"1px solid #ddd",display:"flex",gap:"10px"}}>
+
+<input
+value={input}
+onChange={e=>setInput(e.target.value)}
+onKeyDown={e=>{if(e.key==="Enter")sendMessage()}}
+placeholder="Ask a math question..."
+style={{flex:1,padding:"10px"}}
+/>
+
+<button
+onClick={sendMessage}
+style={{padding:"10px 18px",background:"black",color:"white"}}
+>
+Send
+</button>
+
+</div>
+
+<div style={{padding:"15px"}}>
+<UploadButton onUpload={handleUploadSteps}/>
+</div>
+
+</div>
+
+<div style={{flex:1,background:"#fff",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+
+<div style={{fontSize:"18px",marginBottom:"10px",fontWeight:"bold"}}>
+Step {steps.length} of {allSteps.length}
+</div>
+
+<div style={{width:"80%",maxWidth:"700px",fontSize:"28px",lineHeight:"1.8"}}>
+
+{steps.map((s,i)=>(
+<div key={i} style={{marginBottom:"18px"}}>{s}</div>
+))}
+
+</div>
+
+{isQuestion&&(
+
+<div style={{marginTop:"20px"}}>
+
+<input
+value={answerInput}
+onChange={e=>setAnswerInput(e.target.value)}
+placeholder="Type your answer"
+style={{padding:"10px",fontSize:"16px"}}
+/>
+
+<button
+onClick={checkAnswer}
+style={{marginLeft:"10px",padding:"10px 18px",background:"black",color:"white"}}
+>
+Check Answer
+</button>
+
+{feedback&&(
+<div style={{marginTop:"10px",fontWeight:"bold"}}>{feedback}</div>
+)}
+
+</div>
+
+)}
+
+{!isQuestion&&stepIndex<allSteps.length&&(
+
+<button
+onClick={nextStep}
+style={{marginTop:"20px",padding:"12px 24px",fontSize:"16px",background:"black",color:"white",border:"none"}}
+>
+Next Step
+</button>
+
+)}
+
+</div>
+
+</div>
+
+)
 
 }
