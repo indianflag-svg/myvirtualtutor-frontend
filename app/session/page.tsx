@@ -1,24 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import ReactMarkdown from "react-markdown"
-import remarkMath from "remark-math"
-import rehypeKatex from "rehype-katex"
-import "katex/dist/katex.min.css"
+import UploadButton from "../../components/UploadButton"
 
 const API_BASE = "https://myvirtualtutor-backend-2.onrender.com"
 
-export default function SessionPage(){
+export default function SessionPage() {
 
-  const [messages,setMessages] = useState([
-    {
-      role:"assistant",
-      content:"Hi! I'm your math tutor. What problem would you like help with?"
-    }
+  const [chat, setChat] = useState([
+    { role:"assistant", text:"Hi! I'm your math tutor. Ask me a math problem or upload homework." }
   ])
 
-  const [input,setInput] = useState("")
-  const [loading,setLoading] = useState(false)
+  const [steps, setSteps] = useState([])
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
 
   async function sendMessage(){
 
@@ -27,9 +22,9 @@ export default function SessionPage(){
     const userMessage = input
     setInput("")
 
-    setMessages(prev => [
+    setChat(prev=>[
       ...prev,
-      {role:"user",content:userMessage}
+      { role:"user", text:userMessage }
     ])
 
     setLoading(true)
@@ -41,126 +36,170 @@ export default function SessionPage(){
         headers:{
           "Content-Type":"application/json"
         },
-        body:JSON.stringify({
-          message:userMessage
-        })
+        body:JSON.stringify({message:userMessage})
       })
 
       const data = await res.json()
 
       animateSteps(data.steps || [])
 
-    }catch(err){
-
-      setMessages(prev=>[
+      setChat(prev=>[
         ...prev,
-        {
-          role:"assistant",
-          content:"Tutor could not respond."
-        }
+        { role:"assistant", text:"Let's solve this on the board." }
+      ])
+
+    }catch{
+
+      setChat(prev=>[
+        ...prev,
+        { role:"assistant", text:"Tutor had trouble solving that." }
       ])
 
     }
 
     setLoading(false)
-  }
-
-  function animateSteps(steps){
-
-    let i = 0
-
-    const interval = setInterval(()=>{
-
-      if(i >= steps.length){
-        clearInterval(interval)
-        return
-      }
-
-      setMessages(prev=>[
-        ...prev,
-        {
-          role:"assistant",
-          content:steps[i]
-        }
-      ])
-
-      i++
-
-    },1200)
 
   }
 
-  return(
+  function animateSteps(stepList){
+
+    setSteps([])
+
+    stepList.forEach((step,index)=>{
+
+      setTimeout(()=>{
+
+        setSteps(prev=>[
+          ...prev,
+          step
+        ])
+
+      }, index*1200)
+
+    })
+
+  }
+
+  function handleUploadSteps(uploadSteps){
+
+    setChat(prev=>[
+      ...prev,
+      { role:"assistant", text:"I read the homework. Let's solve it." }
+    ])
+
+    animateSteps(uploadSteps)
+
+  }
+
+  return (
 
     <div style={{
-      maxWidth:"800px",
-      margin:"auto",
-      padding:"40px"
+      display:"flex",
+      height:"100vh",
+      fontFamily:"sans-serif"
     }}>
 
-      <h1>MyVirtualTutor</h1>
+      {/* CHAT PANEL */}
 
       <div style={{
-        border:"1px solid #ddd",
-        height:"400px",
-        overflowY:"auto",
-        padding:"20px",
-        marginBottom:"20px"
+        width:"35%",
+        borderRight:"1px solid #ddd",
+        display:"flex",
+        flexDirection:"column"
       }}>
 
-        {messages.map((m,i)=>(
-          <div key={i} style={{marginBottom:"12px"}}>
+        <div style={{
+          padding:"20px",
+          fontWeight:"bold"
+        }}>
+          MyVirtualTutor
+        </div>
 
-            <b>{m.role === "user" ? "You" : "Tutor"}:</b>
+        <div style={{
+          flex:1,
+          overflowY:"auto",
+          padding:"20px"
+        }}>
 
-            <ReactMarkdown
-              remarkPlugins={[remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-            >
-              {m.content}
-            </ReactMarkdown>
+          {chat.map((m,i)=>(
+            <div key={i} style={{marginBottom:"12px"}}>
+              <b>{m.role==="user"?"You":"Tutor"}:</b> {m.text}
+            </div>
+          ))}
 
-          </div>
-        ))}
+          {loading && <div>Tutor is thinking...</div>}
 
-        {loading && (
-          <div>
-            <b>Tutor:</b> thinking...
-          </div>
-        )}
+        </div>
+
+        <div style={{
+          padding:"15px",
+          borderTop:"1px solid #ddd",
+          display:"flex",
+          gap:"10px"
+        }}>
+
+          <input
+            value={input}
+            onChange={(e)=>setInput(e.target.value)}
+            onKeyDown={(e)=>{
+              if(e.key==="Enter") sendMessage()
+            }}
+            placeholder="Ask a math question..."
+            style={{
+              flex:1,
+              padding:"10px"
+            }}
+          />
+
+          <button
+            onClick={sendMessage}
+            style={{
+              padding:"10px 18px",
+              background:"black",
+              color:"white"
+            }}
+          >
+            Send
+          </button>
+
+        </div>
+
+        <div style={{padding:"15px"}}>
+          <UploadButton onUpload={handleUploadSteps} />
+        </div>
 
       </div>
 
-      <div style={{display:"flex",gap:"10px"}}>
+      {/* WHITEBOARD */}
 
-        <input
-          value={input}
-          onChange={(e)=>setInput(e.target.value)}
-          onKeyDown={(e)=>{
-            if(e.key === "Enter") sendMessage()
-          }}
-          placeholder="Ask a math question..."
-          style={{
-            flex:1,
-            padding:"10px",
-            border:"1px solid #ccc"
-          }}
-        />
+      <div style={{
+        flex:1,
+        background:"#ffffff",
+        display:"flex",
+        flexDirection:"column",
+        alignItems:"center",
+        justifyContent:"center"
+      }}>
 
-        <button
-          onClick={sendMessage}
-          style={{
-            padding:"10px 20px",
-            background:"black",
-            color:"white"
-          }}
-        >
-          Send
-        </button>
+        <div style={{
+          width:"80%",
+          maxWidth:"700px",
+          fontSize:"28px",
+          lineHeight:"1.8"
+        }}>
+
+          {steps.map((s,i)=>(
+            <div key={i}>
+              {s}
+            </div>
+          ))}
+
+        </div>
 
       </div>
 
     </div>
 
   )
+
 }
