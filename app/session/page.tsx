@@ -19,6 +19,7 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(false)
 
   async function sendMessage(){
+
     if(!input.trim()) return
 
     const userMessage = input
@@ -32,6 +33,7 @@ export default function SessionPage() {
     setLoading(true)
 
     try{
+
       const res = await fetch(`${API_BASE}/chat`,{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
@@ -55,13 +57,16 @@ export default function SessionPage() {
       ])
 
     }catch{
+
       setChat(prev=>[
         ...prev,
         { role:"assistant", text:"Tutor had trouble solving that." }
       ])
+
     }
 
     setLoading(false)
+
   }
 
   function nextStep(){
@@ -74,6 +79,7 @@ export default function SessionPage() {
     ])
 
     setStepIndex(stepIndex + 1)
+
   }
 
   function handleUploadSteps(uploadSteps){
@@ -86,7 +92,11 @@ export default function SessionPage() {
       ...prev,
       { role:"assistant", text:"I read the homework. Let's solve it." }
     ])
+
   }
+
+  const currentStepNumber = steps.length
+  const totalSteps = allSteps.length
 
   return (
 
@@ -174,6 +184,18 @@ export default function SessionPage() {
         justifyContent:"center"
       }}>
 
+        {totalSteps > 0 && (
+
+          <div style={{
+            fontSize:"18px",
+            marginBottom:"10px",
+            fontWeight:"bold"
+          }}>
+            Step {currentStepNumber} of {totalSteps}
+          </div>
+
+        )}
+
         <div style={{
           width:"80%",
           maxWidth:"700px",
@@ -190,6 +212,7 @@ export default function SessionPage() {
         </div>
 
         {stepIndex < allSteps.length && (
+
           <button
             onClick={nextStep}
             style={{
@@ -204,6 +227,7 @@ export default function SessionPage() {
           >
             Next Step
           </button>
+
         )}
 
       </div>
@@ -211,4 +235,5 @@ export default function SessionPage() {
     </div>
 
   )
+
 }
