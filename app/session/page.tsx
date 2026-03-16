@@ -101,30 +101,18 @@ export default function SessionPage() {
 
   }
 
-  function handleUploadSteps(uploadSteps){
-
-    const filtered = filterSteps(uploadSteps)
-
-    setAllSteps(filtered)
-    setSteps([filtered[0]])
-    setStepIndex(1)
-
-    setAnswerInput("")
-    setFeedback("")
-
-    setChat(prev=>[
-      ...prev,
-      { role:"assistant", text:"I read the homework. Let's solve it." }
-    ])
-
-  }
-
-  function getCorrectAnswer(){
+  function extractAnswer(){
 
     for(let step of allSteps){
 
       if(step.includes("=") && !step.includes("?")){
-        return step.split("=").pop().trim()
+
+        const match = step.match(/[-]?\d+(\.\d+)?$/)
+
+        if(match){
+          return match[0]
+        }
+
       }
 
     }
@@ -135,7 +123,7 @@ export default function SessionPage() {
 
   function checkAnswer(){
 
-    const correctAnswer = getCorrectAnswer()
+    const correctAnswer = extractAnswer()
 
     if(!correctAnswer){
       setFeedback("Try again.")
