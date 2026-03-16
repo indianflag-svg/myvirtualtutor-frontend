@@ -159,7 +159,20 @@ export default function SessionPage() {
           lineHeight:"1.8"
         }}>
           {steps.map((s,i)=>(
-            <div key={i}>{s}</div>
+            <div key={i} style={{marginBottom:"18px"}}>
+              {typeof s === "string" ? (
+                <div>{s}</div>
+              ) : (
+                <>
+                  {s.explanation && <div>{s.explanation}</div>}
+                  {s.equation && (
+                    <div style={{fontWeight:"bold"}}>
+                      {s.equation}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           ))}
         </div>
       </div>
