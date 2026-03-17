@@ -1,7 +1,6 @@
 "use client"
 
 import Disclaimer from "../../components/Disclaimer"
-"use client"
 
 export const dynamic = "force-dynamic"
 
