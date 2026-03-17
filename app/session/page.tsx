@@ -1,3 +1,5 @@
+"use client"
+
 import Disclaimer from "../../components/Disclaimer"
 "use client"
 
