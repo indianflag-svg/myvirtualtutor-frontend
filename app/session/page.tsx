@@ -1,3 +1,4 @@
+import Disclaimer from "../../components/Disclaimer"
 "use client"
 
 export const dynamic = "force-dynamic"
@@ -146,7 +147,9 @@ MyVirtualTutor
 </div>
 ))}
 
-{loading && <div>Tutor is thinking...</div>}
+{loading && <div>Tutor is thinking...  <Disclaimer />
+</div>
+}
 
 </div>
 
