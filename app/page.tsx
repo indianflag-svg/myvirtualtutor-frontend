@@ -140,6 +140,13 @@ export default function HomePage() {
         </div>
       </section>
 
-    </main>
+    
+      <section style={{ maxWidth: "900px", margin: "40px auto 0", padding: "0 20px" }}>
+        <h2 style={{ fontSize: "28px", marginBottom: "12px" }}>Browse by Grade</h2>
+        <p style={{ marginBottom: "12px" }}>Explore math worksheets organized by grade level.</p>
+        <Link href="/grades">View Math Worksheets by Grade</Link>
+      </section>
+
+</main>
   );
 }
