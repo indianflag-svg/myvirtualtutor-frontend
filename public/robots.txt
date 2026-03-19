@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://myvirtualtutor-frontend-swart.vercel.app/sitemap.xml
