@@ -147,6 +147,13 @@ export default function HomePage() {
         <Link href="/grades">View Math Worksheets by Grade</Link>
       </section>
 
+
+      <section style={{ maxWidth: "900px", margin: "24px auto 0", padding: "0 20px" }}>
+        <h2 style={{ fontSize: "28px", marginBottom: "12px" }}>Browse by Topic</h2>
+        <p style={{ marginBottom: "12px" }}>Find worksheets by math topic, from addition to pre-algebra.</p>
+        <Link href="/topics">View Math Worksheet Topics</Link>
+      </section>
+
 </main>
   );
 }
