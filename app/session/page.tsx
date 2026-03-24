@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 import { useState,useEffect } from "react"
 import UploadButton from "../../components/UploadButton"
 
-const API_BASE="https://myvirtualtutor-backend-2.onrender.com"
+const API_BASE="https://YOUR_NEW_RENDER_URL"
 
 export default function SessionPage(){
 
