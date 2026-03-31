@@ -67,9 +67,12 @@ export default function SessionPage() {
               borderRadius: "10px",
               background: m.role === "user" ? "#007bff" : "#e5e5ea",
               color: m.role === "user" ? "white" : "black",
-              maxWidth: "80%"
+              maxWidth: "80%",
+              whiteSpace: "pre-wrap"
             }}>
-              {m.text}
+              {m.text.split("\n").map((line, idx) => (
+                <div key={idx}>{line}</div>
+              ))}
             </div>
           </div>
         ))}
