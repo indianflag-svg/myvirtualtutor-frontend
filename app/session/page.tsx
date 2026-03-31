@@ -28,7 +28,16 @@ export default function SessionPage() {
 
       const data = await res.json()
 
-      setMessages(prev => [...prev, { role: "assistant", text: data.reply }])
+      const lines = data.reply.split("\n")
+
+      for (let i = 0; i < lines.length; i++) {
+        await new Promise(r => setTimeout(r, 600))
+
+        setMessages(prev => [
+          ...prev,
+          { role: "assistant", text: lines[i] }
+        ])
+      }
 
     } catch {
       setMessages(prev => [...prev, { role: "assistant", text: "Error contacting server" }])
@@ -67,12 +76,9 @@ export default function SessionPage() {
               borderRadius: "10px",
               background: m.role === "user" ? "#007bff" : "#e5e5ea",
               color: m.role === "user" ? "white" : "black",
-              maxWidth: "80%",
-              whiteSpace: "pre-wrap"
+              maxWidth: "80%"
             }}>
-              {m.text.split("\n").map((line, idx) => (
-                <div key={idx}>{line}</div>
-              ))}
+              {m.text}
             </div>
           </div>
         ))}
@@ -102,7 +108,7 @@ export default function SessionPage() {
             color: "white"
           }}
         >
-          {loading ? "..." : "Send"}
+          {loading ? "Thinking..." : "Send"}
         </button>
       </div>
 
