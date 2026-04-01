@@ -32,11 +32,7 @@ export default function SessionPage() {
 
       for (let i = 0; i < lines.length; i++) {
         await new Promise(r => setTimeout(r, 600))
-
-        setMessages(prev => [
-          ...prev,
-          { role: "assistant", text: lines[i] }
-        ])
+        setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
       }
 
     } catch {
@@ -82,6 +78,12 @@ export default function SessionPage() {
             </div>
           </div>
         ))}
+
+        {loading && (
+          <div style={{ color: "#888", fontStyle: "italic" }}>
+            Tutor is thinking...
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", gap: "10px" }}>
@@ -89,6 +91,7 @@ export default function SessionPage() {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Ask a math question..."
+          disabled={loading}
           style={{
             flex: 1,
             padding: "10px",
@@ -108,7 +111,7 @@ export default function SessionPage() {
             color: "white"
           }}
         >
-          {loading ? "Thinking..." : "Send"}
+          {loading ? "..." : "Send"}
         </button>
       </div>
 
