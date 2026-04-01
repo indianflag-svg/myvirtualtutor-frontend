@@ -37,11 +37,10 @@ export default function SessionPage() {
       })
 
       const data = await res.json()
-
       const lines = data.reply.split("\n")
 
       for (let i = 0; i < lines.length; i++) {
-        await new Promise(r => setTimeout(r, 600))
+        await new Promise(r => setTimeout(r, 500))
         setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
       }
 
@@ -53,20 +52,73 @@ export default function SessionPage() {
   }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h2>MyVirtualTutor</h2>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", fontFamily: "Arial" }}>
 
-      <div style={{ height: "400px", overflowY: "auto", marginBottom: "10px" }}>
+      <h2 style={{ textAlign: "center" }}>MyVirtualTutor</h2>
+
+      <div style={{
+        height: "400px",
+        overflowY: "auto",
+        border: "1px solid #ddd",
+        borderRadius: "10px",
+        padding: "10px",
+        marginBottom: "10px",
+        background: "#fafafa"
+      }}>
         {messages.map((m, i) => (
-          <div key={i}>
-            <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
+          <div key={i} style={{
+            marginBottom: "10px",
+            textAlign: m.role === "user" ? "right" : "left"
+          }}>
+            <div style={{
+              display: "inline-block",
+              padding: "10px",
+              borderRadius: "10px",
+              background: m.role === "user" ? "#007bff" : "#e5e5ea",
+              color: m.role === "user" ? "white" : "black",
+              maxWidth: "80%"
+            }}>
+              {m.text}
+            </div>
           </div>
         ))}
-        {loading && <div>Tutor is thinking...</div>}
+
+        {loading && (
+          <div style={{ color: "#888", fontStyle: "italic" }}>
+            Tutor is thinking...
+          </div>
+        )}
       </div>
 
-      <input value={input} onChange={e => setInput(e.target.value)} />
-      <button onClick={sendMessage} disabled={loading}>Send</button>
+      <div style={{ display: "flex", gap: "10px" }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder="Ask a math question..."
+          disabled={loading}
+          style={{
+            flex: 1,
+            padding: "10px",
+            borderRadius: "8px",
+            border: "1px solid #ccc"
+          }}
+        />
+
+        <button
+          onClick={sendMessage}
+          disabled={loading}
+          style={{
+            padding: "10px 15px",
+            borderRadius: "8px",
+            border: "none",
+            background: "#007bff",
+            color: "white"
+          }}
+        >
+          {loading ? "..." : "Send"}
+        </button>
+      </div>
+
     </div>
   )
 }
