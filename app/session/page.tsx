@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
@@ -9,6 +9,16 @@ export default function SessionPage() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
+  const [sessionId, setSessionId] = useState("")
+
+  useEffect(() => {
+    let id = localStorage.getItem("sessionId")
+    if (!id) {
+      id = Math.random().toString(36).substring(2)
+      localStorage.setItem("sessionId", id)
+    }
+    setSessionId(id)
+  }, [])
 
   async function sendMessage() {
     if (!input.trim()) return
@@ -23,7 +33,7 @@ export default function SessionPage() {
       const res = await fetch(API_BASE + "/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg })
+        body: JSON.stringify({ message: userMsg, sessionId })
       })
 
       const data = await res.json()
@@ -43,78 +53,20 @@ export default function SessionPage() {
   }
 
   return (
-    <div style={{
-      maxWidth: "600px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "Arial"
-    }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+      <h2>MyVirtualTutor</h2>
 
-      <h2 style={{ textAlign: "center" }}>MyVirtualTutor</h2>
-
-      <div style={{
-        height: "400px",
-        overflowY: "auto",
-        border: "1px solid #ddd",
-        borderRadius: "10px",
-        padding: "10px",
-        marginBottom: "10px",
-        background: "#fafafa"
-      }}>
+      <div style={{ height: "400px", overflowY: "auto", marginBottom: "10px" }}>
         {messages.map((m, i) => (
-          <div key={i} style={{
-            marginBottom: "10px",
-            textAlign: m.role === "user" ? "right" : "left"
-          }}>
-            <div style={{
-              display: "inline-block",
-              padding: "10px",
-              borderRadius: "10px",
-              background: m.role === "user" ? "#007bff" : "#e5e5ea",
-              color: m.role === "user" ? "white" : "black",
-              maxWidth: "80%"
-            }}>
-              {m.text}
-            </div>
+          <div key={i}>
+            <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
           </div>
         ))}
-
-        {loading && (
-          <div style={{ color: "#888", fontStyle: "italic" }}>
-            Tutor is thinking...
-          </div>
-        )}
+        {loading && <div>Tutor is thinking...</div>}
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Ask a math question..."
-          disabled={loading}
-          style={{
-            flex: 1,
-            padding: "10px",
-            borderRadius: "8px",
-            border: "1px solid #ccc"
-          }}
-        />
-
-        <button
-          onClick={sendMessage}
-          disabled={loading}
-          style={{
-            padding: "10px 15px",
-            borderRadius: "8px",
-            border: "none",
-            background: "#007bff",
-            color: "white"
-          }}
-        >
-          {loading ? "..." : "Send"}
-        </button>
-      </div>
-
+      <input value={input} onChange={e => setInput(e.target.value)} />
+      <button onClick={sendMessage} disabled={loading}>Send</button>
     </div>
   )
 }
