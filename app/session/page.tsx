@@ -1,10 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
 export default function SessionPage() {
+
+  const canvasRef = useRef(null)
+  const [drawing, setDrawing] = useState(false)
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
@@ -20,6 +23,35 @@ export default function SessionPage() {
     setSessionId(id)
   }, [])
 
+  function startDraw(e) {
+    setDrawing(true)
+    draw(e)
+  }
+
+  function endDraw() {
+    setDrawing(false)
+  }
+
+  function draw(e) {
+    if (!drawing) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+    ctx.lineWidth = 3
+    ctx.lineCap = "round"
+    ctx.strokeStyle = "black"
+
+    ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
+  }
+
+  function clearBoard() {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
   async function sendMessage() {
     if (!input.trim()) return
 
@@ -29,94 +61,59 @@ export default function SessionPage() {
     setMessages(prev => [...prev, { role: "user", text: userMsg }])
     setLoading(true)
 
-    try {
-      const res = await fetch(API_BASE + "/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg, sessionId })
-      })
+    const res = await fetch(API_BASE + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userMsg, sessionId })
+    })
 
-      const data = await res.json()
-      const lines = data.reply.split("\n")
+    const data = await res.json()
+    const lines = data.reply.split("\n")
 
-      for (let i = 0; i < lines.length; i++) {
-        await new Promise(r => setTimeout(r, 500))
-        setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
-      }
-
-    } catch {
-      setMessages(prev => [...prev, { role: "assistant", text: "Error contacting server" }])
+    for (let i = 0; i < lines.length; i++) {
+      await new Promise(r => setTimeout(r, 500))
+      setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
     }
 
     setLoading(false)
   }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", fontFamily: "Arial" }}>
+    <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
 
-      <h2 style={{ textAlign: "center" }}>MyVirtualTutor</h2>
+      {/* Chat */}
+      <div style={{ width: "40%" }}>
+        <h2>MyVirtualTutor</h2>
 
-      <div style={{
-        height: "400px",
-        overflowY: "auto",
-        border: "1px solid #ddd",
-        borderRadius: "10px",
-        padding: "10px",
-        marginBottom: "10px",
-        background: "#fafafa"
-      }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{
-            marginBottom: "10px",
-            textAlign: m.role === "user" ? "right" : "left"
-          }}>
-            <div style={{
-              display: "inline-block",
-              padding: "10px",
-              borderRadius: "10px",
-              background: m.role === "user" ? "#007bff" : "#e5e5ea",
-              color: m.role === "user" ? "white" : "black",
-              maxWidth: "80%"
-            }}>
-              {m.text}
+        <div style={{ height: "400px", overflowY: "auto" }}>
+          {messages.map((m, i) => (
+            <div key={i}>
+              <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
             </div>
-          </div>
-        ))}
+          ))}
+          {loading && <div>Tutor is thinking...</div>}
+        </div>
 
-        {loading && (
-          <div style={{ color: "#888", fontStyle: "italic" }}>
-            Tutor is thinking...
-          </div>
-        )}
+        <input value={input} onChange={e => setInput(e.target.value)} />
+        <button onClick={sendMessage}>Send</button>
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Ask a math question..."
-          disabled={loading}
-          style={{
-            flex: 1,
-            padding: "10px",
-            borderRadius: "8px",
-            border: "1px solid #ccc"
-          }}
+      {/* Whiteboard */}
+      <div style={{ width: "60%" }}>
+        <h3>Whiteboard</h3>
+
+        <canvas
+          ref={canvasRef}
+          width={500}
+          height={400}
+          style={{ border: "1px solid black", background: "white" }}
+          onMouseDown={startDraw}
+          onMouseUp={endDraw}
+          onMouseMove={draw}
+          onMouseLeave={endDraw}
         />
 
-        <button
-          onClick={sendMessage}
-          disabled={loading}
-          style={{
-            padding: "10px 15px",
-            borderRadius: "8px",
-            border: "none",
-            background: "#007bff",
-            color: "white"
-          }}
-        >
-          {loading ? "..." : "Send"}
-        </button>
+        <button onClick={clearBoard}>Clear</button>
       </div>
 
     </div>
