@@ -22,24 +22,26 @@ export default function SessionPage() {
     setSessionId(id)
   }, [])
 
-  function clearBoard() {
-    const ctx = canvasRef.current.getContext("2d")
-    ctx.clearRect(0, 0, 500, 400)
+  function cleanLines(text) {
+    return text
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l => l.length > 0)
   }
 
   async function writeToBoard(lines) {
     const ctx = canvasRef.current.getContext("2d")
 
     ctx.clearRect(0, 0, 500, 400)
-    ctx.font = "16px Arial"
+    ctx.font = "18px Arial"
     ctx.fillStyle = "black"
 
     let y = 30
 
     for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 700))
+      await new Promise(r => setTimeout(r, 600))
       ctx.fillText(lines[i], 20, y)
-      y += 25
+      y += 30
     }
   }
 
@@ -58,15 +60,13 @@ export default function SessionPage() {
     })
 
     const data = await res.json()
-    const lines = data.reply.split("\n")
+    const lines = cleanLines(data.reply)
 
-    // animate chat
     for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 400))
+      await new Promise(r => setTimeout(r, 300))
       setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
     }
 
-    // animate whiteboard
     await writeToBoard(lines)
 
     setLoading(false)
