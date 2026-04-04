@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
@@ -12,6 +12,8 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(false)
   const [sessionId, setSessionId] = useState("")
 
+  const chatRef = useRef(null)
+
   useEffect(() => {
     let id = localStorage.getItem("sessionId")
     if (!id) {
@@ -20,6 +22,13 @@ export default function SessionPage() {
     }
     setSessionId(id)
   }, [])
+
+  // AUTO SCROLL
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight
+    }
+  }, [messages])
 
   function cleanLines(text) {
     return text
@@ -72,24 +81,25 @@ export default function SessionPage() {
         background: "#ffffff",
         borderRight: "1px solid #e5e7eb",
         display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
+        flexDirection: "column"
       }}>
 
         <div style={{
           padding: "18px",
           borderBottom: "1px solid #f1f1f1",
-          fontWeight: "600",
-          fontSize: "16px"
+          fontWeight: "600"
         }}>
           MyVirtualTutor
         </div>
 
-        <div style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "15px"
-        }}>
+        <div
+          ref={chatRef}
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "15px"
+          }}
+        >
           {messages.map((m, i) => (
             <div key={i} style={{
               marginBottom: "12px",
@@ -97,14 +107,11 @@ export default function SessionPage() {
               justifyContent: m.role === "user" ? "flex-end" : "flex-start"
             }}>
               <div style={{
-                padding: "12px 14px",
+                padding: "12px",
                 borderRadius: "14px",
                 background: m.role === "user" ? "#2563eb" : "#e2e8f0",
                 color: m.role === "user" ? "white" : "#111",
-                maxWidth: "75%",
-                fontSize: "14px",
-                lineHeight: "1.4",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+                maxWidth: "75%"
               }}>
                 {m.text}
               </div>
@@ -113,10 +120,7 @@ export default function SessionPage() {
           {loading && <div style={{ color: "#888" }}>Tutor is thinking...</div>}
         </div>
 
-        <div style={{
-          padding: "15px",
-          borderTop: "1px solid #f1f1f1"
-        }}>
+        <div style={{ padding: "15px" }}>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -126,8 +130,7 @@ export default function SessionPage() {
               padding: "12px",
               marginBottom: "10px",
               borderRadius: "10px",
-              border: "1px solid #ddd",
-              outline: "none"
+              border: "1px solid #ddd"
             }}
           />
 
@@ -146,9 +149,7 @@ export default function SessionPage() {
               borderRadius: "10px",
               background: "#2563eb",
               color: "white",
-              border: "none",
-              fontWeight: "600",
-              cursor: "pointer"
+              border: "none"
             }}
           >
             {loading ? "..." : "Send"}
@@ -157,27 +158,20 @@ export default function SessionPage() {
 
       </div>
 
-      {/* WHITEBOARD PANEL */}
+      {/* WHITEBOARD */}
       <div style={{
         flex: 1,
         padding: "25px",
         background: "#f8fafc"
       }}>
-        <h3 style={{
-          marginBottom: "15px",
-          fontWeight: "600"
-        }}>
-          Whiteboard
-        </h3>
+        <h3>Whiteboard</h3>
 
         <div style={{
           border: "2px solid #e5e7eb",
           borderRadius: "14px",
           height: "80%",
-          background: "#ffffff",
-          boxShadow: "0 6px 25px rgba(0,0,0,0.05)"
-        }}>
-        </div>
+          background: "#ffffff"
+        }} />
       </div>
 
     </div>
