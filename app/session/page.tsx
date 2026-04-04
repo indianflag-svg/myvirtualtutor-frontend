@@ -51,7 +51,7 @@ export default function SessionPage() {
     const lines = cleanLines(data.reply)
 
     for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 300))
+      await new Promise(r => setTimeout(r, 250))
       setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
     }
 
@@ -62,23 +62,25 @@ export default function SessionPage() {
     <div style={{
       display: "flex",
       height: "100vh",
-      background: "#f4f6f8",
-      fontFamily: "Arial"
+      background: "#eef2f7",
+      fontFamily: "Inter, sans-serif"
     }}>
 
       {/* CHAT PANEL */}
       <div style={{
-        width: "35%",
+        width: "32%",
         background: "#ffffff",
-        borderRight: "2px solid #e0e0e0",
+        borderRight: "1px solid #e5e7eb",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
       }}>
 
         <div style={{
-          padding: "15px",
-          borderBottom: "1px solid #eee",
-          fontWeight: "bold"
+          padding: "18px",
+          borderBottom: "1px solid #f1f1f1",
+          fontWeight: "600",
+          fontSize: "16px"
         }}>
           MyVirtualTutor
         </div>
@@ -90,27 +92,30 @@ export default function SessionPage() {
         }}>
           {messages.map((m, i) => (
             <div key={i} style={{
-              marginBottom: "10px",
-              textAlign: m.role === "user" ? "right" : "left"
+              marginBottom: "12px",
+              display: "flex",
+              justifyContent: m.role === "user" ? "flex-end" : "flex-start"
             }}>
-              <span style={{
-                display: "inline-block",
-                padding: "10px",
-                borderRadius: "10px",
-                background: m.role === "user" ? "#007bff" : "#e9ecef",
-                color: m.role === "user" ? "white" : "black",
-                maxWidth: "80%"
+              <div style={{
+                padding: "12px 14px",
+                borderRadius: "14px",
+                background: m.role === "user" ? "#2563eb" : "#e2e8f0",
+                color: m.role === "user" ? "white" : "#111",
+                maxWidth: "75%",
+                fontSize: "14px",
+                lineHeight: "1.4",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
               }}>
                 {m.text}
-              </span>
+              </div>
             </div>
           ))}
           {loading && <div style={{ color: "#888" }}>Tutor is thinking...</div>}
         </div>
 
         <div style={{
-          padding: "10px",
-          borderTop: "1px solid #eee"
+          padding: "15px",
+          borderTop: "1px solid #f1f1f1"
         }}>
           <input
             value={input}
@@ -118,17 +123,18 @@ export default function SessionPage() {
             placeholder="Ask a math question..."
             style={{
               width: "100%",
-              padding: "10px",
-              marginBottom: "8px",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
+              padding: "12px",
+              marginBottom: "10px",
+              borderRadius: "10px",
+              border: "1px solid #ddd",
+              outline: "none"
             }}
           />
 
           <input
             type="file"
             onChange={e => setFile(e.target.files[0])}
-            style={{ marginBottom: "8px" }}
+            style={{ marginBottom: "10px" }}
           />
 
           <button
@@ -136,11 +142,13 @@ export default function SessionPage() {
             disabled={loading}
             style={{
               width: "100%",
-              padding: "10px",
-              borderRadius: "8px",
-              background: "#007bff",
+              padding: "12px",
+              borderRadius: "10px",
+              background: "#2563eb",
               color: "white",
-              border: "none"
+              border: "none",
+              fontWeight: "600",
+              cursor: "pointer"
             }}
           >
             {loading ? "..." : "Send"}
@@ -152,18 +160,23 @@ export default function SessionPage() {
       {/* WHITEBOARD PANEL */}
       <div style={{
         flex: 1,
-        background: "#ffffff",
-        padding: "20px"
+        padding: "25px",
+        background: "#f8fafc"
       }}>
-        <h3 style={{ marginBottom: "10px" }}>Whiteboard</h3>
+        <h3 style={{
+          marginBottom: "15px",
+          fontWeight: "600"
+        }}>
+          Whiteboard
+        </h3>
 
         <div style={{
-          border: "2px solid #ccc",
-          borderRadius: "10px",
+          border: "2px solid #e5e7eb",
+          borderRadius: "14px",
           height: "80%",
-          background: "#fff"
+          background: "#ffffff",
+          boxShadow: "0 6px 25px rgba(0,0,0,0.05)"
         }}>
-          {/* (canvas already exists in your logic) */}
         </div>
       </div>
 
