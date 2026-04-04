@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
 export default function SessionPage() {
 
+  const canvasRef = useRef(null)
+
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
-  const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [sessionId, setSessionId] = useState("")
 
@@ -21,31 +22,32 @@ export default function SessionPage() {
     setSessionId(id)
   }, [])
 
+  function cleanLines(text) {
+    return text
+      .split("\n")
+      .map(l => l.trim())
+      .filter((l, i, arr) => l.length > 0 && l !== arr[i - 1]) // remove duplicates
+  }
+
   async function sendMessage() {
-    if (!input.trim() && !file) return
+    if (!input.trim()) return
 
-    setLoading(true)
-
-    const formData = new FormData()
-    formData.append("message", input)
-    formData.append("sessionId", sessionId)
-    if (file) formData.append("file", file)
-
-    setMessages(prev => [...prev, { role: "user", text: input || "[uploaded file]" }])
+    const userMsg = input
     setInput("")
-    setFile(null)
+    setMessages(prev => [...prev, { role: "user", text: userMsg }])
+    setLoading(true)
 
     const res = await fetch(API_BASE + "/chat", {
       method: "POST",
-      body: formData
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userMsg, sessionId })
     })
 
     const data = await res.json()
-
-    const lines = data.reply.split("\n")
+    const lines = cleanLines(data.reply)
 
     for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 400))
+      await new Promise(r => setTimeout(r, 300))
       setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
     }
 
@@ -64,17 +66,7 @@ export default function SessionPage() {
         ))}
       </div>
 
-      <input
-        value={input}
-        onChange={e => setInput(e.target.value)}
-        placeholder="Ask or upload..."
-      />
-
-      <input
-        type="file"
-        onChange={e => setFile(e.target.files[0])}
-      />
-
+      <input value={input} onChange={e => setInput(e.target.value)} />
       <button onClick={sendMessage} disabled={loading}>
         {loading ? "..." : "Send"}
       </button>
