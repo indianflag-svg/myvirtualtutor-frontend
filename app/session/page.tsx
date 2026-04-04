@@ -59,31 +59,114 @@ export default function SessionPage() {
   }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h2>MyVirtualTutor</h2>
+    <div style={{
+      display: "flex",
+      height: "100vh",
+      background: "#f4f6f8",
+      fontFamily: "Arial"
+    }}>
 
-      <div style={{ height: "350px", overflowY: "auto", marginBottom: "10px" }}>
-        {messages.map((m, i) => (
-          <div key={i}>
-            <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
-          </div>
-        ))}
+      {/* CHAT PANEL */}
+      <div style={{
+        width: "35%",
+        background: "#ffffff",
+        borderRight: "2px solid #e0e0e0",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+
+        <div style={{
+          padding: "15px",
+          borderBottom: "1px solid #eee",
+          fontWeight: "bold"
+        }}>
+          MyVirtualTutor
+        </div>
+
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "15px"
+        }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{
+              marginBottom: "10px",
+              textAlign: m.role === "user" ? "right" : "left"
+            }}>
+              <span style={{
+                display: "inline-block",
+                padding: "10px",
+                borderRadius: "10px",
+                background: m.role === "user" ? "#007bff" : "#e9ecef",
+                color: m.role === "user" ? "white" : "black",
+                maxWidth: "80%"
+              }}>
+                {m.text}
+              </span>
+            </div>
+          ))}
+          {loading && <div style={{ color: "#888" }}>Tutor is thinking...</div>}
+        </div>
+
+        <div style={{
+          padding: "10px",
+          borderTop: "1px solid #eee"
+        }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Ask a math question..."
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "8px",
+              borderRadius: "8px",
+              border: "1px solid #ccc"
+            }}
+          />
+
+          <input
+            type="file"
+            onChange={e => setFile(e.target.files[0])}
+            style={{ marginBottom: "8px" }}
+          />
+
+          <button
+            onClick={sendMessage}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "10px",
+              borderRadius: "8px",
+              background: "#007bff",
+              color: "white",
+              border: "none"
+            }}
+          >
+            {loading ? "..." : "Send"}
+          </button>
+        </div>
+
       </div>
 
-      <input
-        value={input}
-        onChange={e => setInput(e.target.value)}
-        placeholder="Ask a math question..."
-      />
+      {/* WHITEBOARD PANEL */}
+      <div style={{
+        flex: 1,
+        background: "#ffffff",
+        padding: "20px"
+      }}>
+        <h3 style={{ marginBottom: "10px" }}>Whiteboard</h3>
 
-      <input
-        type="file"
-        onChange={e => setFile(e.target.files[0])}
-      />
+        <div style={{
+          border: "2px solid #ccc",
+          borderRadius: "10px",
+          height: "80%",
+          background: "#fff"
+        }}>
+          {/* (canvas already exists in your logic) */}
+        </div>
+      </div>
 
-      <button onClick={sendMessage} disabled={loading}>
-        {loading ? "..." : "Send"}
-      </button>
     </div>
   )
 }
