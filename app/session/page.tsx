@@ -1,15 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
 export default function SessionPage() {
 
-  const canvasRef = useRef(null)
-
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
+  const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [sessionId, setSessionId] = useState("")
 
@@ -22,88 +21,63 @@ export default function SessionPage() {
     setSessionId(id)
   }, [])
 
-  function cleanLines(text) {
-    return text
-      .split("\n")
-      .map(l => l.trim())
-      .filter(l => l.length > 0)
-  }
-
-  async function writeToBoard(lines) {
-    const ctx = canvasRef.current.getContext("2d")
-
-    ctx.clearRect(0, 0, 500, 400)
-    ctx.font = "18px Arial"
-    ctx.fillStyle = "black"
-
-    let y = 30
-
-    for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 600))
-      ctx.fillText(lines[i], 20, y)
-      y += 30
-    }
-  }
-
   async function sendMessage() {
-    if (!input.trim()) return
+    if (!input.trim() && !file) return
 
-    const userMsg = input
-    setInput("")
-    setMessages(prev => [...prev, { role: "user", text: userMsg }])
     setLoading(true)
+
+    const formData = new FormData()
+    formData.append("message", input)
+    formData.append("sessionId", sessionId)
+    if (file) formData.append("file", file)
+
+    setMessages(prev => [...prev, { role: "user", text: input || "[uploaded file]" }])
+    setInput("")
+    setFile(null)
 
     const res = await fetch(API_BASE + "/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userMsg, sessionId })
+      body: formData
     })
 
     const data = await res.json()
-    const lines = cleanLines(data.reply)
+
+    const lines = data.reply.split("\n")
 
     for (let i = 0; i < lines.length; i++) {
-      await new Promise(r => setTimeout(r, 300))
+      await new Promise(r => setTimeout(r, 400))
       setMessages(prev => [...prev, { role: "assistant", text: lines[i] }])
     }
-
-    await writeToBoard(lines)
 
     setLoading(false)
   }
 
   return (
-    <div style={{ display: "flex", gap: "20px", padding: "20px", fontFamily: "Arial" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+      <h2>MyVirtualTutor</h2>
 
-      {/* Chat */}
-      <div style={{ width: "40%", border: "1px solid #ddd", borderRadius: "12px", padding: "15px" }}>
-        <h3>Chat</h3>
-
-        <div style={{ height: "350px", overflowY: "auto" }}>
-          {messages.map((m, i) => (
-            <div key={i}>
-              <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
-            </div>
-          ))}
-          {loading && <div>Tutor is thinking...</div>}
-        </div>
-
-        <input value={input} onChange={e => setInput(e.target.value)} />
-        <button onClick={sendMessage}>Send</button>
+      <div style={{ height: "350px", overflowY: "auto", marginBottom: "10px" }}>
+        {messages.map((m, i) => (
+          <div key={i}>
+            <b>{m.role === "user" ? "You" : "Tutor"}:</b> {m.text}
+          </div>
+        ))}
       </div>
 
-      {/* Whiteboard */}
-      <div style={{ width: "60%", border: "1px solid #ddd", borderRadius: "12px", padding: "15px" }}>
-        <h3>Whiteboard</h3>
+      <input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        placeholder="Ask or upload..."
+      />
 
-        <canvas
-          ref={canvasRef}
-          width={500}
-          height={400}
-          style={{ border: "2px solid #ccc", borderRadius: "8px" }}
-        />
-      </div>
+      <input
+        type="file"
+        onChange={e => setFile(e.target.files[0])}
+      />
 
+      <button onClick={sendMessage} disabled={loading}>
+        {loading ? "..." : "Send"}
+      </button>
     </div>
   )
 }
