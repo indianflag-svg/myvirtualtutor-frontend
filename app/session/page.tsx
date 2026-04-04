@@ -1,15 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 
 const API_BASE = "https://myvirtualtutor-backend-new.onrender.com"
 
 export default function SessionPage() {
 
-  const canvasRef = useRef(null)
-
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
+  const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [sessionId, setSessionId] = useState("")
 
@@ -26,21 +25,26 @@ export default function SessionPage() {
     return text
       .split("\n")
       .map(l => l.trim())
-      .filter((l, i, arr) => l.length > 0 && l !== arr[i - 1]) // remove duplicates
+      .filter((l, i, arr) => l.length > 0 && l !== arr[i - 1])
   }
 
   async function sendMessage() {
-    if (!input.trim()) return
+    if (!input.trim() && !file) return
 
-    const userMsg = input
-    setInput("")
-    setMessages(prev => [...prev, { role: "user", text: userMsg }])
     setLoading(true)
+
+    const formData = new FormData()
+    formData.append("message", input)
+    formData.append("sessionId", sessionId)
+    if (file) formData.append("file", file)
+
+    setMessages(prev => [...prev, { role: "user", text: input || "[uploaded file]" }])
+    setInput("")
+    setFile(null)
 
     const res = await fetch(API_BASE + "/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userMsg, sessionId })
+      body: formData
     })
 
     const data = await res.json()
@@ -66,7 +70,17 @@ export default function SessionPage() {
         ))}
       </div>
 
-      <input value={input} onChange={e => setInput(e.target.value)} />
+      <input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        placeholder="Ask a math question..."
+      />
+
+      <input
+        type="file"
+        onChange={e => setFile(e.target.files[0])}
+      />
+
       <button onClick={sendMessage} disabled={loading}>
         {loading ? "..." : "Send"}
       </button>
