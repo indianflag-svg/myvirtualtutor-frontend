@@ -25,7 +25,7 @@ export default function SessionContent() {
     setInput("")
 
     try {
-      const res = await fetch("https://YOUR-RENDER-URL.onrender.com/chat", {
+      const res = await fetch("https://myvirtualtutor-backend-new.onrender.com/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
