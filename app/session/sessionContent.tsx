@@ -25,7 +25,7 @@ export default function SessionContent() {
     setInput("")
 
     try {
-      const res = await fetch("http://localhost:10000/chat", {
+      const res = await fetch("https://YOUR-RENDER-URL.onrender.com/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
