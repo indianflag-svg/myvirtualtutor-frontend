@@ -1,36 +1,152 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 export default function Home() {
+  const steps = [
+    "Step 1: Subtract 6 from both sides",
+    "2x = 4",
+    "Step 2: Divide both sides by 2",
+    "x = 2"
+  ]
+
+  const [visibleSteps, setVisibleSteps] = useState<string[]>([])
+
+  useEffect(() => {
+    let i = 0
+    const interval = setInterval(() => {
+      setVisibleSteps((prev) => {
+        if (i >= steps.length) return prev
+        return [...prev, steps[i]]
+      })
+      i++
+      if (i >= steps.length) clearInterval(interval)
+    }, 700)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center text-center px-6">
+    <main className="min-h-screen bg-gray-50 text-gray-900">
+      {/* NAVBAR */}
+      <nav className="flex justify-between items-center px-6 py-4 bg-white border-b">
+        <div className="font-bold text-lg text-blue-600">
+          MyVirtualTutor
+        </div>
 
-      <h1 className="text-5xl font-bold mb-6">
-        Learn Math <span className="text-blue-600">Step-by-Step</span>
-      </h1>
+        <div className="flex gap-6 items-center">
+          <Link href="/worksheets" className="text-gray-600 hover:text-black">
+            Worksheets
+          </Link>
 
-      <p className="text-lg text-gray-600 mb-10 max-w-xl">
-        Built for grades 6–12. A calm AI tutor that teaches you how to solve problems — not just gives answers.
-      </p>
+          <Link href="/login">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90">
+              Login
+            </button>
+          </Link>
+        </div>
+      </nav>
 
-      <div className="flex gap-4">
-        
-        {/* 🔥 FIXED BUTTON */}
-        <Link href="/session?problem=2x+6=10">
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold">
-            Start Learning
-          </button>
-        </Link>
+      {/* HERO */}
+      <section className="flex flex-col items-center text-center px-6 py-24">
+        <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          Learn Math <span className="text-blue-600">Step-by-Step</span>
+        </h1>
 
-        <Link href="/worksheets">
-          <button className="border px-6 py-3 rounded-xl font-semibold">
-            Practice Worksheets
-          </button>
-        </Link>
+        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mb-10">
+          Built for grades 6–12. A calm AI tutor that teaches you how to solve problems — not just gives answers.
+        </p>
 
-      </div>
+        {/* DEMO */}
+        <div className="bg-gray-900 text-white border border-gray-800 rounded-2xl p-6 max-w-xl w-full text-left mb-10 shadow-lg">
+          <p className="text-gray-400 mb-2">Example</p>
+          <p className="mb-4">2x + 6 = 10</p>
 
+          <div className="space-y-2 text-gray-300 min-h-[140px]">
+            {visibleSteps.map((step, index) => (
+              <p key={index}>{step}</p>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <Link href="/session?problem=2x+6=10">
+            <button className="bg-blue-600 text-white px-7 py-3 rounded-2xl font-semibold hover:opacity-90">
+              Start Learning
+            </button>
+          </Link>
+
+          <Link href="/worksheets">
+            <button className="border border-gray-300 px-7 py-3 rounded-2xl font-semibold hover:bg-gray-100">
+              Practice Worksheets
+            </button>
+          </Link>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="px-6 py-24 bg-white text-center">
+        <h2 className="text-3xl font-semibold mb-12">What Students & Parents Say</h2>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “This actually explains math better than my teacher. I finally understand algebra.”
+            </p>
+            <p className="font-semibold">— 8th Grade Student</p>
+          </div>
+
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “My son stopped guessing answers and started understanding the steps.”
+            </p>
+            <p className="font-semibold">— Parent</p>
+          </div>
+
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “Way better than just getting answers. It actually teaches.”
+            </p>
+            <p className="font-semibold">— High School Student</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="px-6 py-24 text-center max-w-5xl mx-auto">
+        <h2 className="text-3xl font-semibold mb-12">Why Students Love It</h2>
+
+        <div className="grid md:grid-cols-2 gap-6 text-gray-700">
+          <div className="p-6 bg-white rounded-xl shadow-sm border">📚 Step-by-step explanations</div>
+          <div className="p-6 bg-white rounded-xl shadow-sm border">📷 Upload homework photos</div>
+          <div className="p-6 bg-white rounded-xl shadow-sm border">🧠 Actually understand concepts</div>
+          <div className="p-6 bg-white rounded-xl shadow-sm border">✏️ Interactive whiteboard (coming)</div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="px-6 py-24 text-center bg-white">
+        <h2 className="text-3xl font-semibold mb-10">Simple Pricing</h2>
+
+        <div className="p-8 rounded-xl max-w-md mx-auto border shadow-sm">
+          <p className="text-3xl font-bold mb-4">
+            $10<span className="text-lg text-gray-500"> / month</span>
+          </p>
+
+          <ul className="text-gray-600 space-y-2 mb-6">
+            <li>Unlimited questions</li>
+            <li>Homework help</li>
+            <li>Step-by-step tutoring</li>
+          </ul>
+
+          <Link href="/session?problem=2x+6=10">
+            <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold w-full hover:opacity-90">
+              Get Started
+            </button>
+          </Link>
+        </div>
+      </section>
     </main>
   )
 }
