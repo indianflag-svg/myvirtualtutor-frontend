@@ -25,7 +25,7 @@ export default function SessionContent() {
     setInput("")
 
     try {
-      const res = await fetch("http://98.82.7.68:8000/chat", {
+      const res = await fetch("https://98.82.7.68:8000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -39,7 +39,7 @@ export default function SessionContent() {
         ...prev,
         { role: "assistant", text: data.reply || "Error" }
       ])
-    } catch {
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
         { role: "assistant", text: "Connection error" }
