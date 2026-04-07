@@ -9,6 +9,7 @@ export default function SessionContent() {
 
   const [messages, setMessages] = useState<any[]>([])
   const [input, setInput] = useState("")
+  const [visibleSteps, setVisibleSteps] = useState<number[]>([])
 
   useEffect(() => {
     if (problem) {
@@ -23,6 +24,7 @@ export default function SessionContent() {
 
     setMessages((prev) => [...prev, { role: "user", text: messageToSend }])
     setInput("")
+    setVisibleSteps([])
 
     try {
       const res = await fetch("https://myvirtualtutor-backend-new.onrender.com/chat", {
@@ -35,10 +37,20 @@ export default function SessionContent() {
 
       const data = await res.json()
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: data.reply || "Error" }
-      ])
+      const newMessage = { role: "assistant", text: data.reply || "Error" }
+
+      setMessages((prev) => [...prev, newMessage])
+
+      // 🔥 ANIMATE STEPS
+      const stepsCount = data.reply.split("Step").length - 1
+
+      let i = 0
+      const interval = setInterval(() => {
+        setVisibleSteps((prev) => [...prev, i])
+        i++
+        if (i >= stepsCount + 1) clearInterval(interval)
+      }, 700)
+
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -82,16 +94,21 @@ export default function SessionContent() {
           return (
             <div key={i} className="space-y-4 max-w-md">
 
-              {steps.map((step, idx) => (
-                <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
-                  <p className="font-semibold mb-2">{step.title}</p>
-                  {step.details.map((d, j) => (
-                    <p key={j} className="text-gray-600">{d}</p>
-                  ))}
-                </div>
-              ))}
+              {steps.map((step, idx) =>
+                visibleSteps.includes(idx) ? (
+                  <div
+                    key={idx}
+                    className="bg-white border p-4 rounded-xl shadow-sm transition-opacity duration-500"
+                  >
+                    <p className="font-semibold mb-2">{step.title}</p>
+                    {step.details.map((d, j) => (
+                      <p key={j} className="text-gray-600">{d}</p>
+                    ))}
+                  </div>
+                ) : null
+              )}
 
-              {finalAnswer && (
+              {finalAnswer && visibleSteps.includes(steps.length) && (
                 <div className="bg-green-100 border border-green-300 p-4 rounded-xl">
                   <p className="font-semibold text-green-800">Final Answer</p>
                   <p className="text-green-900 text-lg mt-1">{finalAnswer.trim()}</p>
