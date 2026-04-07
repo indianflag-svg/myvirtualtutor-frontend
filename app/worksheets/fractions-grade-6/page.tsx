@@ -1,59 +1,68 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 
-export default function Worksheet(){
+export default function Worksheet() {
+  const problems = [
+    "1/2 + 3/4",
+    "5/6 - 1/3",
+    "2/3 × 4/5",
+    "7/8 ÷ 2/3",
+    "3/4 + 2/5"
+  ]
 
-const router = useRouter()
+  return (
+    <main className="min-h-screen bg-gray-50 text-gray-900 px-6 py-12">
 
-function solve(problem:string){
+      {/* TITLE */}
+      <div className="max-w-3xl mx-auto text-center mb-10">
+        <h1 className="text-3xl font-bold mb-4">
+          6th Grade Fractions Worksheet
+        </h1>
+        <p className="text-gray-600">
+          Practice fractions step-by-step. Get help instantly if you get stuck.
+        </p>
+      </div>
 
-const encoded = encodeURIComponent(problem)
+      {/* PROBLEMS */}
+      <div className="max-w-2xl mx-auto space-y-6">
 
-router.push(`/session?problem=${encoded}`)
+        {problems.map((problem, index) => (
+          <div key={index} className="bg-white p-6 rounded-xl border shadow-sm">
 
-}
+            <p className="font-semibold mb-3">
+              Problem {index + 1}
+            </p>
 
-return(
+            <p className="text-lg mb-4">
+              {problem}
+            </p>
 
-<div style={{
-maxWidth:"900px",
-margin:"40px auto",
-fontFamily:"sans-serif"
-}}>
+            {/* CTA */}
+            <Link href={`/session?problem=${encodeURIComponent(problem)}`}>
+              <button className="text-blue-600 font-medium hover:underline">
+                Solve step-by-step →
+              </button>
+            </Link>
 
-<h1>6th Grade Fractions Worksheet</h1>
+          </div>
+        ))}
 
-<p>Practice fraction operations. If you get stuck, click <b>Solve with AI Tutor</b>.</p>
+      </div>
 
-<hr/>
+      {/* BIG CTA */}
+      <div className="text-center mt-16">
+        <p className="text-gray-600 mb-4">
+          Need help with any problem?
+        </p>
 
-<div style={{marginTop:"30px"}}>
+        <Link href="/session">
+          <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90">
+            Ask AI Tutor
+          </button>
+        </Link>
+      </div>
 
-<h3>1) 3/4 + 2/5</h3>
-<button onClick={()=>solve("3/4 + 2/5")}>
-Solve with AI Tutor
-</button>
-
-<h3>2) 7/8 - 1/4</h3>
-<button onClick={()=>solve("7/8 - 1/4")}>
-Solve with AI Tutor
-</button>
-
-<h3>3) 2/3 × 3/5</h3>
-<button onClick={()=>solve("2/3 * 3/5")}>
-Solve with AI Tutor
-</button>
-
-<h3>4) 5/6 ÷ 2/3</h3>
-<button onClick={()=>solve("5/6 / 2/3")}>
-Solve with AI Tutor
-</button>
-
-</div>
-
-</div>
-
-)
-
+    </main>
+  )
 }
