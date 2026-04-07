@@ -81,6 +81,34 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TESTIMONIALS 🔥 */}
+      <section className="px-6 py-24 bg-white text-center">
+        <h2 className="text-3xl font-semibold mb-12">What Students & Parents Say</h2>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “This actually explains math better than my teacher. I finally understand algebra.”
+            </p>
+            <p className="font-semibold">— 8th Grade Student</p>
+          </div>
+
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “My son stopped guessing answers and started understanding the steps.”
+            </p>
+            <p className="font-semibold">— Parent</p>
+          </div>
+
+          <div className="p-6 border rounded-xl shadow-sm">
+            <p className="text-gray-600 mb-4">
+              “Way better than just getting answers. It actually teaches.”
+            </p>
+            <p className="font-semibold">— High School Student</p>
+          </div>
+        </div>
+      </section>
+
       {/* FEATURES */}
       <section className="px-6 py-24 text-center max-w-5xl mx-auto">
         <h2 className="text-3xl font-semibold mb-12">Why Students Love It</h2>
