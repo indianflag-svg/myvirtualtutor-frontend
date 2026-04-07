@@ -47,15 +47,20 @@ export default function SessionContent() {
     }
   }
 
-  // 🔥 SMART STEP PARSER
   const formatSteps = (text: string) => {
-    return text.split("Step").slice(1).map((chunk, i) => {
+    const parts = text.split("Final answer:")
+    const stepsPart = parts[0]
+    const finalAnswer = parts[1]
+
+    const steps = stepsPart.split("Step").slice(1).map((chunk) => {
       const lines = chunk.split("\n").filter(l => l.trim() !== "")
       return {
         title: "Step " + lines[0],
         details: lines.slice(1)
       }
     })
+
+    return { steps, finalAnswer }
   }
 
   return (
@@ -63,35 +68,39 @@ export default function SessionContent() {
 
       <div className="flex-1 overflow-y-auto space-y-6 mb-4">
 
-        {messages.map((msg, i) => (
-          <div key={i}>
-
-            {msg.role === "user" && (
-              <div className="bg-blue-600 text-white p-3 rounded-xl max-w-md ml-auto">
+        {messages.map((msg, i) => {
+          if (msg.role === "user") {
+            return (
+              <div key={i} className="bg-blue-600 text-white p-3 rounded-xl max-w-md ml-auto">
                 {msg.text}
               </div>
-            )}
+            )
+          }
 
-            {msg.role === "assistant" && (
-              <div className="space-y-4 max-w-md">
+          const { steps, finalAnswer } = formatSteps(msg.text)
 
-                {formatSteps(msg.text).map((step, idx) => (
-                  <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
+          return (
+            <div key={i} className="space-y-4 max-w-md">
 
-                    <p className="font-semibold mb-2">{step.title}</p>
+              {steps.map((step, idx) => (
+                <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
+                  <p className="font-semibold mb-2">{step.title}</p>
+                  {step.details.map((d, j) => (
+                    <p key={j} className="text-gray-600">{d}</p>
+                  ))}
+                </div>
+              ))}
 
-                    {step.details.map((d, j) => (
-                      <p key={j} className="text-gray-600">{d}</p>
-                    ))}
+              {finalAnswer && (
+                <div className="bg-green-100 border border-green-300 p-4 rounded-xl">
+                  <p className="font-semibold text-green-800">Final Answer</p>
+                  <p className="text-green-900 text-lg mt-1">{finalAnswer.trim()}</p>
+                </div>
+              )}
 
-                  </div>
-                ))}
-
-              </div>
-            )}
-
-          </div>
-        ))}
+            </div>
+          )
+        })}
 
       </div>
 
