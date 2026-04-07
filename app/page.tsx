@@ -7,23 +7,24 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white">
 
       {/* HERO */}
-      <section className="flex flex-col items-center justify-center text-center px-6 py-24">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          Learn Math Step-by-Step
+      <section className="flex flex-col items-center justify-center text-center px-6 py-28 bg-gradient-to-b from-black to-gray-900">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          Learn Math <span className="text-gray-400">Step-by-Step</span>
         </h1>
+
         <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-10">
-          A calm AI tutor that teaches you how to solve problems — not just gives answers.
+          Built for grades 6–12. A calm AI tutor that teaches you how to solve problems — not just gives answers.
         </p>
 
         <div className="flex gap-4">
           <Link href="/session">
-            <button className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:opacity-90">
+            <button className="bg-white text-black px-7 py-3 rounded-2xl font-semibold hover:scale-105 transition">
               Start Learning
             </button>
           </Link>
 
           <Link href="/worksheets">
-            <button className="border border-white px-6 py-3 rounded-xl font-semibold hover:bg-white hover:text-black">
+            <button className="border border-gray-600 px-7 py-3 rounded-2xl font-semibold hover:bg-white hover:text-black transition">
               Practice Worksheets
             </button>
           </Link>
@@ -31,42 +32,54 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="px-6 py-20 text-center max-w-4xl mx-auto">
-        <h2 className="text-3xl font-semibold mb-10">How It Works</h2>
+      <section className="px-6 py-24 text-center max-w-5xl mx-auto">
+        <h2 className="text-4xl font-semibold mb-14">How It Works</h2>
 
-        <div className="space-y-6 text-gray-300">
-          <p>1. Ask a math question or upload homework</p>
-          <p>2. Get step-by-step explanations</p>
-          <p>3. Learn the process, not just the answer</p>
+        <div className="grid md:grid-cols-3 gap-10 text-gray-300">
+          <div className="p-6 bg-gray-900 rounded-2xl">
+            <p className="text-2xl mb-3">1</p>
+            <p>Ask a math question or upload homework</p>
+          </div>
+
+          <div className="p-6 bg-gray-900 rounded-2xl">
+            <p className="text-2xl mb-3">2</p>
+            <p>Get step-by-step explanations</p>
+          </div>
+
+          <div className="p-6 bg-gray-900 rounded-2xl">
+            <p className="text-2xl mb-3">3</p>
+            <p>Understand the process, not just the answer</p>
+          </div>
         </div>
       </section>
 
       {/* FEATURES */}
-      <section className="px-6 py-20 bg-gray-900 text-center">
-        <h2 className="text-3xl font-semibold mb-10">Why Students Love It</h2>
+      <section className="px-6 py-24 bg-gray-950 text-center">
+        <h2 className="text-4xl font-semibold mb-14">Why Students Love It</h2>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto text-gray-300">
-          <div>📚 Step-by-step explanations</div>
-          <div>📷 Upload homework photos</div>
-          <div>🧠 Understand concepts clearly</div>
-          <div>✏️ Interactive whiteboard (coming)</div>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto text-gray-300">
+          <div className="p-6 bg-gray-900 rounded-2xl">📚 Step-by-step explanations</div>
+          <div className="p-6 bg-gray-900 rounded-2xl">📷 Upload homework photos</div>
+          <div className="p-6 bg-gray-900 rounded-2xl">🧠 Actually understand concepts</div>
+          <div className="p-6 bg-gray-900 rounded-2xl">✏️ Interactive whiteboard (coming)</div>
         </div>
       </section>
 
       {/* PRICING */}
-      <section className="px-6 py-20 text-center">
-        <h2 className="text-3xl font-semibold mb-10">Simple Pricing</h2>
+      <section className="px-6 py-24 text-center">
+        <h2 className="text-4xl font-semibold mb-12">Simple Pricing</h2>
 
-        <div className="bg-gray-900 p-8 rounded-xl max-w-sm mx-auto">
-          <p className="text-2xl font-bold mb-4">$10 / month</p>
-          <ul className="text-gray-300 space-y-2 mb-6">
+        <div className="bg-gray-900 p-10 rounded-2xl max-w-md mx-auto border border-gray-800">
+          <p className="text-3xl font-bold mb-4">$10<span className="text-lg text-gray-400"> / month</span></p>
+
+          <ul className="text-gray-300 space-y-3 mb-8">
             <li>Unlimited questions</li>
             <li>Homework help</li>
             <li>Step-by-step tutoring</li>
           </ul>
 
           <Link href="/session">
-            <button className="bg-white text-black px-6 py-3 rounded-xl font-semibold w-full">
+            <button className="bg-white text-black px-6 py-3 rounded-xl font-semibold w-full hover:scale-105 transition">
               Get Started
             </button>
           </Link>
@@ -74,13 +87,13 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 py-20 text-center">
-        <h2 className="text-3xl font-semibold mb-6">
+      <section className="px-6 py-24 text-center">
+        <h2 className="text-4xl font-semibold mb-6">
           Start Learning Smarter Today
         </h2>
 
         <Link href="/session">
-          <button className="bg-white text-black px-8 py-4 rounded-xl font-semibold">
+          <button className="bg-white text-black px-10 py-4 rounded-2xl font-semibold hover:scale-105 transition">
             Start Now
           </button>
         </Link>
