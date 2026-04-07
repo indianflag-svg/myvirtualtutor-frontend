@@ -1,8 +1,27 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 export default function Home() {
+  const steps = [
+    "Step 1: Subtract 6 → 2x = 4",
+    "Step 2: Divide by 2 → x = 2"
+  ]
+
+  const [visibleSteps, setVisibleSteps] = useState<string[]>([])
+
+  useEffect(() => {
+    let i = 0
+    const interval = setInterval(() => {
+      setVisibleSteps((prev) => [...prev, steps[i]])
+      i++
+      if (i >= steps.length) clearInterval(interval)
+    }, 800)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <main className="min-h-screen bg-black text-white">
 
@@ -16,14 +35,15 @@ export default function Home() {
           Built for grades 6–12. A calm AI tutor that teaches you how to solve problems — not just gives answers.
         </p>
 
-        {/* DEMO BOX (🔥 THIS IS THE UPGRADE) */}
+        {/* DEMO */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-xl w-full text-left mb-10 shadow-lg">
           <p className="text-gray-400 mb-2">Example</p>
           <p className="mb-4">2x + 6 = 10</p>
 
           <div className="space-y-2 text-gray-300">
-            <p>Step 1: Subtract 6 → 2x = 4</p>
-            <p>Step 2: Divide by 2 → x = 2</p>
+            {visibleSteps.map((step, index) => (
+              <p key={index}>{step}</p>
+            ))}
           </div>
         </div>
 
