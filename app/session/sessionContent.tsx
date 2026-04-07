@@ -39,7 +39,7 @@ export default function SessionContent() {
         ...prev,
         { role: "assistant", text: data.reply || "Error" }
       ])
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { role: "assistant", text: "Connection error" }
@@ -47,27 +47,48 @@ export default function SessionContent() {
     }
   }
 
+  // 🔥 SPLIT STEPS CLEANLY
+  const formatSteps = (text: string) => {
+    return text.split("\n").filter(line => line.trim() !== "")
+  }
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col p-6">
+    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col p-6">
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`p-3 rounded-xl max-w-xl ${
-              msg.role === "user"
-                ? "bg-blue-600 self-end"
-                : "bg-gray-800 self-start"
-            }`}
-          >
-            {msg.text}
+          <div key={i}>
+
+            {msg.role === "user" && (
+              <div className="bg-blue-600 text-white p-3 rounded-xl max-w-md ml-auto">
+                {msg.text}
+              </div>
+            )}
+
+            {msg.role === "assistant" && (
+              <div className="space-y-3 max-w-md">
+
+                {formatSteps(msg.text).map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white border p-4 rounded-xl shadow-sm"
+                  >
+                    {step}
+                  </div>
+                ))}
+
+              </div>
+            )}
+
           </div>
         ))}
+
       </div>
 
       <div className="flex gap-2">
         <input
-          className="flex-1 p-3 rounded-xl bg-gray-800 text-white"
+          className="flex-1 p-3 rounded-xl border"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a math question..."
@@ -75,7 +96,7 @@ export default function SessionContent() {
 
         <button
           onClick={() => handleSend()}
-          className="bg-blue-600 px-4 rounded-xl"
+          className="bg-blue-600 text-white px-4 rounded-xl"
         >
           Send
         </button>
