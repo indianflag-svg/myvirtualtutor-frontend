@@ -25,6 +25,25 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
 
+      {/* NAVBAR */}
+      <nav className="flex justify-between items-center px-6 py-4 bg-white border-b">
+        <div className="font-bold text-lg text-blue-600">
+          MyVirtualTutor
+        </div>
+
+        <div className="flex gap-6 items-center">
+          <Link href="/worksheets" className="text-gray-600 hover:text-black">
+            Worksheets
+          </Link>
+
+          <Link href="/login">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90">
+              Login
+            </button>
+          </Link>
+        </div>
+      </nav>
+
       {/* HERO */}
       <section className="flex flex-col items-center text-center px-6 py-24">
         <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -35,7 +54,7 @@ export default function Home() {
           Built for grades 6–12. A calm AI tutor that teaches you how to solve problems — not just gives answers.
         </p>
 
-        {/* DEMO (dark card) */}
+        {/* DEMO */}
         <div className="bg-gray-900 text-white border border-gray-800 rounded-2xl p-6 max-w-xl w-full text-left mb-10 shadow-lg">
           <p className="text-gray-400 mb-2">Example</p>
           <p className="mb-4">2x + 6 = 10</p>
