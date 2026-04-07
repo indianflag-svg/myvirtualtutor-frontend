@@ -36,13 +36,13 @@ export default function SessionContent() {
       })
 
       const data = await res.json()
+      const reply = data.reply || "Error"
 
-      const newMessage = { role: "assistant", text: data.reply || "Error" }
-
+      const newMessage = { role: "assistant", text: reply }
       setMessages((prev) => [...prev, newMessage])
 
-      // 🔥 ANIMATE STEPS
-      const stepsCount = data.reply.split("Step").length - 1
+      // Animate steps
+      const stepsCount = reply.split("Step").length - 1
 
       let i = 0
       const interval = setInterval(() => {
@@ -75,6 +75,14 @@ export default function SessionContent() {
     return { steps, finalAnswer }
   }
 
+  const cleanLine = (line: string) => {
+    return line.replace(/^-/, "").trim()
+  }
+
+  const isEquation = (line: string) => {
+    return line.includes("=")
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col p-6">
 
@@ -96,14 +104,26 @@ export default function SessionContent() {
 
               {steps.map((step, idx) =>
                 visibleSteps.includes(idx) ? (
-                  <div
-                    key={idx}
-                    className="bg-white border p-4 rounded-xl shadow-sm transition-opacity duration-500"
-                  >
+                  <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
+
                     <p className="font-semibold mb-2">{step.title}</p>
-                    {step.details.map((d, j) => (
-                      <p key={j} className="text-gray-600">{d}</p>
-                    ))}
+
+                    {step.details.map((d, j) => {
+                      const clean = cleanLine(d)
+
+                      return (
+                        <div key={j} className="ml-2 mt-1">
+                          {clean.includes(":") ? (
+                            <p className="font-medium">{clean}</p>
+                          ) : isEquation(clean) ? (
+                            <p className="font-mono text-lg">{clean}</p>
+                          ) : (
+                            <p className="text-gray-600">{clean}</p>
+                          )}
+                        </div>
+                      )
+                    })}
+
                   </div>
                 ) : null
               )}
