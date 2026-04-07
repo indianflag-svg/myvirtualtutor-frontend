@@ -47,15 +47,21 @@ export default function SessionContent() {
     }
   }
 
-  // 🔥 SPLIT STEPS CLEANLY
+  // 🔥 SMART STEP PARSER
   const formatSteps = (text: string) => {
-    return text.split("\n").filter(line => line.trim() !== "")
+    return text.split("Step").slice(1).map((chunk, i) => {
+      const lines = chunk.split("\n").filter(l => l.trim() !== "")
+      return {
+        title: "Step " + lines[0],
+        details: lines.slice(1)
+      }
+    })
   }
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col p-6">
 
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+      <div className="flex-1 overflow-y-auto space-y-6 mb-4">
 
         {messages.map((msg, i) => (
           <div key={i}>
@@ -67,14 +73,17 @@ export default function SessionContent() {
             )}
 
             {msg.role === "assistant" && (
-              <div className="space-y-3 max-w-md">
+              <div className="space-y-4 max-w-md">
 
                 {formatSteps(msg.text).map((step, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white border p-4 rounded-xl shadow-sm"
-                  >
-                    {step}
+                  <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
+
+                    <p className="font-semibold mb-2">{step.title}</p>
+
+                    {step.details.map((d, j) => (
+                      <p key={j} className="text-gray-600">{d}</p>
+                    ))}
+
                   </div>
                 ))}
 
