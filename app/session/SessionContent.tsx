@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
+import 'katex/dist/katex.min.css'
+import { BlockMath } from 'react-katex'
 
 export default function SessionContent() {
   const searchParams = useSearchParams()
   const initialQuestion = searchParams.get("question")
 
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! I’m your math tutor. Ask me anything." }
-  ])
+  const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
 
   const bottomRef = useRef(null)
@@ -24,28 +24,9 @@ export default function SessionContent() {
     }
   }, [initialQuestion])
 
-  // 🔥 FORMAT RESPONSE INTO STEPS
-  const formatSteps = (text) => {
-    const lines = text.split("\n").filter(l => l.trim() !== "")
-
-    return lines.map((line, i) => {
-      if (line.toLowerCase().includes("step")) {
-        return { type: "step", content: line }
-      }
-      if (line.toLowerCase().includes("final")) {
-        return { type: "final", content: line }
-      }
-      return { type: "text", content: line }
-    })
-  }
-
-  const typeMessage = async (text) => {
-    const formatted = formatSteps(text)
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: formatted }
-    ])
+  // 🔥 Convert simple fractions → LaTeX
+  const formatMath = (text) => {
+    return text.replace(/(\d+)\/(\d+)/g, '\\frac{$1}{$2}')
   }
 
   const sendMessage = async (text) => {
@@ -66,12 +47,15 @@ export default function SessionContent() {
       const data = await res.json()
       const reply = data.reply || "Here’s the solution."
 
-      await typeMessage(reply)
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: formatMath(reply) }
+      ])
 
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: [{ type: "text", content: "Error getting response." }] }
+        { role: "assistant", content: "Error getting response." }
       ])
     }
 
@@ -80,6 +64,7 @@ export default function SessionContent() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-4">
+
       <div className="max-w-2xl mx-auto space-y-4">
 
         {messages.map((msg, i) => (
@@ -91,47 +76,22 @@ export default function SessionContent() {
                 : "bg-gray-800"
             }`}
           >
-            {typeof msg.content === "string" ? (
-              msg.content
-            ) : (
-              msg.content.map((block, idx) => {
-                if (block.type === "step") {
-                  return (
-                    <div key={idx} className="mb-2">
-                      <div className="text-blue-400 font-semibold">
-                        {block.content}
-                      </div>
-                    </div>
-                  )
-                }
-
-                if (block.type === "final") {
-                  return (
-                    <div key={idx} className="mt-3 text-green-400 font-bold">
-                      {block.content}
-                    </div>
-                  )
-                }
-
-                return (
-                  <div key={idx} className="text-gray-200">
-                    {block.content}
-                  </div>
-                )
-              })
-            )}
+            {msg.role === "assistant"
+              ? <BlockMath math={msg.content} />
+              : msg.content}
           </div>
         ))}
 
         {loading && (
           <div className="text-gray-400 text-sm animate-pulse">
-            Solving step-by-step...
+            Solving...
           </div>
         )}
 
         <div ref={bottomRef} />
 
       </div>
+
     </div>
   )
 }

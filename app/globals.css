@@ -39,3 +39,4 @@ body {
   background: rgba(56, 189, 248, 0.25);
 }
 
+@import 'katex/dist/katex.min.css';
