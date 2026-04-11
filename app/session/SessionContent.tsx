@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 
 export default function SessionContent() {
@@ -12,20 +12,47 @@ export default function SessionContent() {
   ])
   const [loading, setLoading] = useState(false)
 
+  const bottomRef = useRef(null)
+
+  // 🔥 AUTO SCROLL
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // 🔥 AUTO SEND
   useEffect(() => {
     if (initialQuestion) {
       sendMessage(initialQuestion)
     }
   }, [initialQuestion])
 
+  const typeMessage = async (text) => {
+    let displayed = ""
+    for (let i = 0; i < text.length; i++) {
+      displayed += text[i]
+
+      await new Promise((res) => setTimeout(res, 10)) // typing speed
+
+      setMessages((prev) => {
+        const updated = [...prev]
+        updated[updated.length - 1] = {
+          role: "assistant",
+          content: displayed
+        }
+        return updated
+      })
+    }
+  }
+
   const sendMessage = async (text) => {
     if (!text) return
 
     setMessages((prev) => [...prev, { role: "user", content: text }])
 
+    // placeholder message for typing effect
     setMessages((prev) => [
       ...prev,
-      { role: "assistant", content: "Got it — let’s solve this step by step 👇" }
+      { role: "assistant", content: "" }
     ])
 
     setLoading(true)
@@ -33,16 +60,17 @@ export default function SessionContent() {
     try {
       const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ message: text })
       })
 
       const data = await res.json()
+      const reply = data.reply || "Here’s the solution."
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply || "Here’s the solution." }
-      ])
+      await typeMessage(reply)
+
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -54,20 +82,33 @@ export default function SessionContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black p-4">
+    <div className="min-h-screen bg-[#0f172a] text-white p-4">
+
       <div className="max-w-2xl mx-auto space-y-4">
+
         {messages.map((msg, i) => (
-          <div key={i} className={`p-3 rounded-lg ${
-            msg.role === "user" ? "bg-gray-200" : "bg-gray-100"
-          }`}>
+          <div
+            key={i}
+            className={`p-3 rounded-2xl max-w-[80%] ${
+              msg.role === "user"
+                ? "bg-blue-600 ml-auto"
+                : "bg-gray-800"
+            }`}
+          >
             {msg.content}
           </div>
         ))}
 
         {loading && (
-          <div className="text-gray-500 text-sm">Thinking...</div>
+          <div className="text-gray-400 text-sm animate-pulse">
+            Thinking...
+          </div>
         )}
+
+        <div ref={bottomRef} />
+
       </div>
+
     </div>
   )
 }
