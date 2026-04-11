@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import 'katex/dist/katex.min.css'
-import { BlockMath } from 'react-katex'
+import { InlineMath } from 'react-katex'
 
 export default function SessionContent() {
   const searchParams = useSearchParams()
@@ -24,9 +24,24 @@ export default function SessionContent() {
     }
   }, [initialQuestion])
 
-  // 🔥 Convert simple fractions → LaTeX
-  const formatMath = (text) => {
+  // 🔥 Convert fractions → LaTeX inline
+  const formatInlineMath = (text) => {
     return text.replace(/(\d+)\/(\d+)/g, '\\frac{$1}{$2}')
+  }
+
+  // 🔥 Split into structured steps
+  const parseSteps = (text) => {
+    const lines = text.split("\n").filter(l => l.trim() !== "")
+
+    return lines.map((line) => {
+      if (line.toLowerCase().includes("step")) {
+        return { type: "step", content: line }
+      }
+      if (line.toLowerCase().includes("final")) {
+        return { type: "final", content: line }
+      }
+      return { type: "text", content: line }
+    })
   }
 
   const sendMessage = async (text) => {
@@ -47,19 +62,33 @@ export default function SessionContent() {
       const data = await res.json()
       const reply = data.reply || "Here’s the solution."
 
+      const structured = parseSteps(reply)
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: formatMath(reply) }
+        { role: "assistant", content: structured }
       ])
 
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Error getting response." }
+        { role: "assistant", content: [{ type: "text", content: "Error getting response." }] }
       ])
     }
 
     setLoading(false)
+  }
+
+  // 🔥 Render text with inline math
+  const renderLine = (text) => {
+    const parts = text.split(/(\d+\/\d+)/g)
+
+    return parts.map((part, i) => {
+      if (/\d+\/\d+/.test(part)) {
+        return <InlineMath key={i} math={formatInlineMath(part)} />
+      }
+      return <span key={i}>{part}</span>
+    })
   }
 
   return (
@@ -76,15 +105,43 @@ export default function SessionContent() {
                 : "bg-gray-800"
             }`}
           >
-            {msg.role === "assistant"
-              ? <BlockMath math={msg.content} />
-              : msg.content}
+            {msg.role === "user" && msg.content}
+
+            {msg.role === "assistant" && (
+              <div className="space-y-2">
+
+                {msg.content.map((block, idx) => {
+                  if (block.type === "step") {
+                    return (
+                      <div key={idx} className="text-blue-400 font-semibold">
+                        {renderLine(block.content)}
+                      </div>
+                    )
+                  }
+
+                  if (block.type === "final") {
+                    return (
+                      <div key={idx} className="mt-3 text-green-400 font-bold text-lg">
+                        {renderLine(block.content)}
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div key={idx} className="text-gray-200">
+                      {renderLine(block.content)}
+                    </div>
+                  )
+                })}
+
+              </div>
+            )}
           </div>
         ))}
 
         {loading && (
           <div className="text-gray-400 text-sm animate-pulse">
-            Solving...
+            Solving step-by-step...
           </div>
         )}
 
