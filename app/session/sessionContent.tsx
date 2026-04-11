@@ -23,7 +23,6 @@ export default function SessionContent() {
 
     setMessages((prev) => [...prev, { role: "user", content: text }])
 
-    // ⚡ instant feedback
     setMessages((prev) => [
       ...prev,
       { role: "assistant", content: "Got it — let’s solve this step by step 👇" }
