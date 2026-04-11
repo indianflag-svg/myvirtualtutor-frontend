@@ -1,81 +1,95 @@
 "use client"
 
-import { useParams } from "next/navigation"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 
-function generateProblems(slug:string){
+export default function WorksheetPage() {
+  const [answers, setAnswers] = useState({})
 
-slug = slug.toLowerCase()
+  const problems = [
+    { id: 1, question: "Example problem 1 =" },
+    { id: 2, question: "Example problem 2 =" },
+    { id: 3, question: "Example problem 3 =" }
+  ]
 
-if(slug.includes("addition")) return ["24 + 15","31 + 46","58 + 27","63 + 18"]
-if(slug.includes("subtraction")) return ["52 - 17","64 - 28","91 - 36","73 - 19"]
-if(slug.includes("multiplication")) return ["7 * 8","9 * 6","12 * 4","15 * 3"]
-if(slug.includes("division")) return ["144 / 12","225 / 15","360 / 9","420 / 7"]
-if(slug.includes("fraction")) return ["3/4 + 2/5","7/8 - 1/4","2/3 * 3/5","5/6 / 2/3"]
-if(slug.includes("decimal")) return ["3.4 + 2.7","7.5 - 1.8","6.2 * 4","9.6 / 3"]
-if(slug.includes("percent")) return ["20% of 50","35% of 80","10% of 120","25% of 64"]
-if(slug.includes("algebra") || slug.includes("equation")) return ["2x + 6 = 10","3x - 4 = 11","5x = 45","4x + 8 = 20"]
+  const handleChange = (id, value) => {
+    setAnswers({ ...answers, [id]: value })
+  }
 
-return ["12 + 8","15 * 3","24 / 6","9 + 11"]
-}
+  const openTutor = (question) => {
+    window.location.href = `/session?question=${encodeURIComponent(question)}`
+  }
 
-function generateTitle(slug:string){
-return slug.replace(/-/g," ").replace(/\b\w/g,l=>l.toUpperCase())
-}
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 px-4 py-10">
 
-const related = [
-"grade-3-addition-worksheet",
-"grade-4-multiplication-worksheet",
-"grade-5-fractions-worksheet",
-"long-division-worksheet",
-"pre-algebra-equations-worksheet"
-]
+      <div className="max-w-3xl mx-auto text-center mb-10">
+        <h1 className="text-3xl font-bold mb-3">
+          Worksheet Practice (Free + Step-by-Step Help)
+        </h1>
+        <p className="text-gray-600 mb-5">
+          Practice problems and get instant step-by-step explanations with your AI tutor.
+        </p>
 
-export default function WorksheetPage(){
+        <button
+          onClick={() => openTutor("Help me solve this worksheet")}
+          className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90"
+        >
+          Start Solving with AI Tutor
+        </button>
+      </div>
 
-const params = useParams()
-const router = useRouter()
+      <div className="max-w-2xl mx-auto space-y-6">
+        {problems.map((p) => (
+          <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border">
+            <p className="text-lg font-medium mb-3">
+              {p.id}. {p.question}
+            </p>
 
-const slug = params.slug as string
+            <input
+              type="text"
+              placeholder="Your answer"
+              value={answers[p.id] || ""}
+              onChange={(e) => handleChange(p.id, e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 mb-3"
+            />
 
-const title = generateTitle(slug)
-const problems = generateProblems(slug)
+            <button
+              onClick={() => openTutor(p.question)}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Get step-by-step help →
+            </button>
+          </div>
+        ))}
+      </div>
 
-function solve(problem:string){
-router.push(`/session?problem=${encodeURIComponent(problem)}`)
-}
+      <div className="max-w-2xl mx-auto text-center mt-12 bg-white p-6 rounded-2xl shadow-sm border">
+        <h2 className="text-xl font-semibold mb-2">
+          Stuck on a problem?
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Get instant step-by-step help from your AI tutor.
+        </p>
 
-return(
+        <button
+          onClick={() => openTutor("I need help with this worksheet")}
+          className="bg-black text-white px-6 py-3 rounded-xl"
+        >
+          Start Free Session
+        </button>
+      </div>
 
-<div style={{maxWidth:"900px",margin:"40px auto",fontFamily:"sans-serif"}}>
+      <div className="max-w-2xl mx-auto mt-12 text-sm text-gray-600 leading-relaxed">
+        <h3 className="font-semibold mb-2">
+          About this worksheet
+        </h3>
+        <p>
+          These worksheets help students practice core math skills with guided,
+          step-by-step solutions. Use the AI tutor to understand each step and
+          improve your problem-solving skills.
+        </p>
+      </div>
 
-<h1>{title}</h1>
-
-<p>Practice problems. Click <b>Solve with AI Tutor</b> if you get stuck.</p>
-
-{problems.map((p:string,i:number)=>(
-<div key={i} style={{marginBottom:"20px"}}>
-<h3>{i+1}) {p}</h3>
-<button onClick={()=>solve(p)} style={{padding:"10px 16px",background:"black",color:"white"}}>
-Solve with AI Tutor
-</button>
-</div>
-))}
-
-<hr style={{margin:"40px 0"}}/>
-
-<h2>Related Worksheets</h2>
-
-<ul>
-{related.map((r,i)=>(
-<li key={i} style={{marginBottom:"10px"}}>
-<a href={`/worksheets/${r}`}>{generateTitle(r)}</a>
-</li>
-))}
-</ul>
-
-</div>
-
-)
-
+    </div>
+  )
 }
