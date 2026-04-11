@@ -10,6 +10,8 @@ export default function SessionContent() {
   const initialQuestion = searchParams.get("question")
 
   const [messages, setMessages] = useState([])
+  const [steps, setSteps] = useState([])
+  const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
 
   const bottomRef = useRef(null)
@@ -20,66 +22,14 @@ export default function SessionContent() {
 
   useEffect(() => {
     if (initialQuestion) {
-      sendMessage(initialQuestion)
+      startSolving(initialQuestion)
     }
   }, [initialQuestion])
 
-  // 🔥 Convert fractions → LaTeX inline
   const formatInlineMath = (text) => {
     return text.replace(/(\d+)\/(\d+)/g, '\\frac{$1}{$2}')
   }
 
-  // 🔥 Split into structured steps
-  const parseSteps = (text) => {
-    const lines = text.split("\n").filter(l => l.trim() !== "")
-
-    return lines.map((line) => {
-      if (line.toLowerCase().includes("step")) {
-        return { type: "step", content: line }
-      }
-      if (line.toLowerCase().includes("final")) {
-        return { type: "final", content: line }
-      }
-      return { type: "text", content: line }
-    })
-  }
-
-  const sendMessage = async (text) => {
-    if (!text) return
-
-    setMessages((prev) => [...prev, { role: "user", content: text }])
-    setLoading(true)
-
-    try {
-      const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: text })
-      })
-
-      const data = await res.json()
-      const reply = data.reply || "Here’s the solution."
-
-      const structured = parseSteps(reply)
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: structured }
-      ])
-
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: [{ type: "text", content: "Error getting response." }] }
-      ])
-    }
-
-    setLoading(false)
-  }
-
-  // 🔥 Render text with inline math
   const renderLine = (text) => {
     const parts = text.split(/(\d+\/\d+)/g)
 
@@ -90,6 +40,72 @@ export default function SessionContent() {
       return <span key={i}>{part}</span>
     })
   }
+
+  const parseSteps = (text) => {
+    return text
+      .split("\n")
+      .filter(l => l.trim() !== "")
+  }
+
+  const startSolving = async (question) => {
+    setMessages([{ role: "user", content: question }])
+    setLoading(true)
+
+    try {
+      const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: question })
+      })
+
+      const data = await res.json()
+      const reply = data.reply || ""
+
+      const parsedSteps = parseSteps(reply)
+      setSteps(parsedSteps)
+
+      // show first step only
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: parsedSteps[0] },
+        { role: "assistant", content: "What should we do next?" }
+      ])
+
+      setCurrentStep(1)
+
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Error getting response." }
+      ])
+    }
+
+    setLoading(false)
+  }
+
+  const handleUserAnswer = (text) => {
+    setMessages((prev) => [...prev, { role: "user", content: text }])
+
+    if (currentStep < steps.length) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: steps[currentStep] }
+      ])
+
+      setCurrentStep((prev) => prev + 1)
+
+      if (currentStep + 1 < steps.length) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "What should we do next?" }
+        ])
+      }
+    }
+  }
+
+  const [input, setInput] = useState("")
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-4">
@@ -105,47 +121,36 @@ export default function SessionContent() {
                 : "bg-gray-800"
             }`}
           >
-            {msg.role === "user" && msg.content}
-
-            {msg.role === "assistant" && (
-              <div className="space-y-2">
-
-                {msg.content.map((block, idx) => {
-                  if (block.type === "step") {
-                    return (
-                      <div key={idx} className="text-blue-400 font-semibold">
-                        {renderLine(block.content)}
-                      </div>
-                    )
-                  }
-
-                  if (block.type === "final") {
-                    return (
-                      <div key={idx} className="mt-3 text-green-400 font-bold text-lg">
-                        {renderLine(block.content)}
-                      </div>
-                    )
-                  }
-
-                  return (
-                    <div key={idx} className="text-gray-200">
-                      {renderLine(block.content)}
-                    </div>
-                  )
-                })}
-
-              </div>
-            )}
+            {renderLine(msg.content)}
           </div>
         ))}
 
         {loading && (
           <div className="text-gray-400 text-sm animate-pulse">
-            Solving step-by-step...
+            Preparing steps...
           </div>
         )}
 
         <div ref={bottomRef} />
+
+        {/* INPUT BOX */}
+        <div className="flex gap-2 mt-4">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Your answer..."
+            className="flex-1 p-2 rounded-lg text-black"
+          />
+          <button
+            onClick={() => {
+              handleUserAnswer(input)
+              setInput("")
+            }}
+            className="bg-blue-600 px-4 rounded-lg"
+          >
+            Send
+          </button>
+        </div>
 
       </div>
 
