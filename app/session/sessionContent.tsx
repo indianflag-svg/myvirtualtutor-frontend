@@ -5,158 +5,70 @@ import { useSearchParams } from "next/navigation"
 
 export default function SessionContent() {
   const searchParams = useSearchParams()
-  const problem = searchParams.get("problem")
+  const initialQuestion = searchParams.get("question")
 
-  const [messages, setMessages] = useState<any[]>([])
-  const [input, setInput] = useState("")
-  const [visibleSteps, setVisibleSteps] = useState<number[]>([])
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Hi! I’m your math tutor. Ask me anything." }
+  ])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (problem) {
-      setInput(problem)
-      handleSend(problem)
+    if (initialQuestion) {
+      sendMessage(initialQuestion)
     }
-  }, [problem])
+  }, [initialQuestion])
 
-  const handleSend = async (customInput?: string) => {
-    const messageToSend = customInput || input
-    if (!messageToSend) return
+  const sendMessage = async (text) => {
+    if (!text) return
 
-    setMessages((prev) => [...prev, { role: "user", text: messageToSend }])
-    setInput("")
-    setVisibleSteps([])
+    setMessages((prev) => [...prev, { role: "user", content: text }])
+
+    // ⚡ instant feedback
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "Got it — let’s solve this step by step 👇" }
+    ])
+
+    setLoading(true)
 
     try {
-      const res = await fetch("https://myvirtualtutor-backend-new.onrender.com/chat", {
+      const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: messageToSend })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
       })
 
       const data = await res.json()
-      const reply = data.reply || "Error"
 
-      const newMessage = { role: "assistant", text: reply }
-      setMessages((prev) => [...prev, newMessage])
-
-      // Animate steps
-      const stepsCount = reply.split("Step").length - 1
-
-      let i = 0
-      const interval = setInterval(() => {
-        setVisibleSteps((prev) => [...prev, i])
-        i++
-        if (i >= stepsCount + 1) clearInterval(interval)
-      }, 700)
-
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.reply || "Here’s the solution." }
+      ])
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", text: "Connection error" }
+        { role: "assistant", content: "Error getting response." }
       ])
     }
-  }
 
-  const formatSteps = (text: string) => {
-    const parts = text.split("Final answer:")
-    const stepsPart = parts[0]
-    const finalAnswer = parts[1]
-
-    const steps = stepsPart.split("Step").slice(1).map((chunk) => {
-      const lines = chunk.split("\n").filter(l => l.trim() !== "")
-      return {
-        title: "Step " + lines[0],
-        details: lines.slice(1)
-      }
-    })
-
-    return { steps, finalAnswer }
-  }
-
-  const cleanLine = (line: string) => {
-    return line.replace(/^-/, "").trim()
-  }
-
-  const isEquation = (line: string) => {
-    return line.includes("=")
+    setLoading(false)
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col p-6">
+    <div className="min-h-screen bg-white text-black p-4">
+      <div className="max-w-2xl mx-auto space-y-4">
+        {messages.map((msg, i) => (
+          <div key={i} className={`p-3 rounded-lg ${
+            msg.role === "user" ? "bg-gray-200" : "bg-gray-100"
+          }`}>
+            {msg.content}
+          </div>
+        ))}
 
-      <div className="flex-1 overflow-y-auto space-y-6 mb-4">
-
-        {messages.map((msg, i) => {
-          if (msg.role === "user") {
-            return (
-              <div key={i} className="bg-blue-600 text-white p-3 rounded-xl max-w-md ml-auto">
-                {msg.text}
-              </div>
-            )
-          }
-
-          const { steps, finalAnswer } = formatSteps(msg.text)
-
-          return (
-            <div key={i} className="space-y-4 max-w-md">
-
-              {steps.map((step, idx) =>
-                visibleSteps.includes(idx) ? (
-                  <div key={idx} className="bg-white border p-4 rounded-xl shadow-sm">
-
-                    <p className="font-semibold mb-2">{step.title}</p>
-
-                    {step.details.map((d, j) => {
-                      const clean = cleanLine(d)
-
-                      return (
-                        <div key={j} className="ml-2 mt-1">
-                          {clean.includes(":") ? (
-                            <p className="font-medium">{clean}</p>
-                          ) : isEquation(clean) ? (
-                            <p className="font-mono text-lg">{clean}</p>
-                          ) : (
-                            <p className="text-gray-600">{clean}</p>
-                          )}
-                        </div>
-                      )
-                    })}
-
-                  </div>
-                ) : null
-              )}
-
-              {finalAnswer && visibleSteps.includes(steps.length) && (
-                <div className="bg-green-100 border border-green-300 p-4 rounded-xl">
-                  <p className="font-semibold text-green-800">Final Answer</p>
-                  <p className="text-green-900 text-lg mt-1">{finalAnswer.trim()}</p>
-                </div>
-              )}
-
-            </div>
-          )
-        })}
-
+        {loading && (
+          <div className="text-gray-500 text-sm">Thinking...</div>
+        )}
       </div>
-
-      <div className="flex gap-2">
-        <input
-          className="flex-1 p-3 rounded-xl border"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a math question..."
-        />
-
-        <button
-          onClick={() => handleSend()}
-          className="bg-blue-600 text-white px-4 rounded-xl"
-        >
-          Send
-        </button>
-      </div>
-
-    </main>
+    </div>
   )
 }
