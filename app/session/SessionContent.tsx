@@ -13,6 +13,7 @@ export default function SessionContent() {
   const [steps, setSteps] = useState([])
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [input, setInput] = useState("")
 
   const bottomRef = useRef(null)
 
@@ -42,70 +43,98 @@ export default function SessionContent() {
   }
 
   const parseSteps = (text) => {
-    return text
-      .split("\n")
-      .filter(l => l.trim() !== "")
+    return text.split("\n").filter(l => l.trim() !== "")
   }
 
   const startSolving = async (question) => {
     setMessages([{ role: "user", content: question }])
     setLoading(true)
 
-    try {
-      const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: question })
-      })
+    const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: question })
+    })
 
-      const data = await res.json()
-      const reply = data.reply || ""
+    const data = await res.json()
+    const parsedSteps = parseSteps(data.reply || "")
 
-      const parsedSteps = parseSteps(reply)
-      setSteps(parsedSteps)
+    setSteps(parsedSteps)
 
-      // show first step only
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: parsedSteps[0] },
-        { role: "assistant", content: "What should we do next?" }
-      ])
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: parsedSteps[0] },
+      { role: "assistant", content: "What should we do next?" }
+    ])
 
-      setCurrentStep(1)
+    setCurrentStep(1)
+    setLoading(false)
+  }
 
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Error getting response." }
-      ])
+  // 🔥 SMART FEEDBACK CHECK
+  const checkAnswer = async (userAnswer) => {
+    const prompt = `
+We are solving a math problem step-by-step.
+
+Current step: ${steps[currentStep - 1]}
+Student answer: ${userAnswer}
+
+Is the student correct? Respond in this format:
+CORRECT or INCORRECT
+Then a short explanation.
+`
+
+    const res = await fetch("https://myvirtualtutor-backend-2.onrender.com/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: prompt })
+    })
+
+    const data = await res.json()
+    return data.reply || ""
+  }
+
+  const handleUserAnswer = async () => {
+    if (!input) return
+
+    const userInput = input
+    setInput("")
+
+    setMessages((prev) => [...prev, { role: "user", content: userInput }])
+    setLoading(true)
+
+    const feedback = await checkAnswer(userInput)
+
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: feedback }
+    ])
+
+    // 🔥 If correct → move forward
+    if (feedback.toLowerCase().includes("correct")) {
+      if (currentStep < steps.length) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: steps[currentStep] }
+        ])
+
+        setCurrentStep((prev) => prev + 1)
+
+        if (currentStep + 1 < steps.length) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: "What should we do next?" }
+          ])
+        }
+      }
     }
 
     setLoading(false)
   }
-
-  const handleUserAnswer = (text) => {
-    setMessages((prev) => [...prev, { role: "user", content: text }])
-
-    if (currentStep < steps.length) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: steps[currentStep] }
-      ])
-
-      setCurrentStep((prev) => prev + 1)
-
-      if (currentStep + 1 < steps.length) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "What should we do next?" }
-        ])
-      }
-    }
-  }
-
-  const [input, setInput] = useState("")
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-4">
@@ -127,13 +156,13 @@ export default function SessionContent() {
 
         {loading && (
           <div className="text-gray-400 text-sm animate-pulse">
-            Preparing steps...
+            Checking your answer...
           </div>
         )}
 
         <div ref={bottomRef} />
 
-        {/* INPUT BOX */}
+        {/* INPUT */}
         <div className="flex gap-2 mt-4">
           <input
             value={input}
@@ -142,10 +171,7 @@ export default function SessionContent() {
             className="flex-1 p-2 rounded-lg text-black"
           />
           <button
-            onClick={() => {
-              handleUserAnswer(input)
-              setInput("")
-            }}
+            onClick={handleUserAnswer}
             className="bg-blue-600 px-4 rounded-lg"
           >
             Send
