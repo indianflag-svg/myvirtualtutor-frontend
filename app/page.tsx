@@ -159,7 +159,7 @@ export default function Home() {
               </div>
 
               <div className="text-xs text-green-600 font-medium">
-                Live Demo
+                Tutor Preview
               </div>
 
             </div>
