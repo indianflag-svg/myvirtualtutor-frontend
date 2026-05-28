@@ -1,4 +1,4 @@
-import Link from "next/link"
+"use client"
 
 const problems = [
   "3/4 + 2/5",
@@ -8,6 +8,10 @@ const problems = [
 ]
 
 export default function FractionsGrade6Page() {
+  const openTutor = (problem: string) => {
+    window.location.href = `/session?problem=${encodeURIComponent(problem)}`
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f7fb] text-gray-900 px-6 py-16">
       <section className="max-w-3xl mx-auto text-center mb-12">
@@ -31,12 +35,13 @@ export default function FractionsGrade6Page() {
               {problem}
             </p>
 
-            <Link
-              href={`/session?problem=${encodeURIComponent(problem)}`}
-              className="inline-flex bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
+            <button
+              type="button"
+              onClick={() => openTutor(problem)}
+              className="bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
             >
               Solve with AI Tutor →
-            </Link>
+            </button>
           </div>
         ))}
       </section>
