@@ -3,9 +3,9 @@
 import { Suspense } from "react"
 import SessionContent from "./SessionContent"
 
-export default function Page() {
+export default function SessionPage() {
   return (
-    <Suspense fallback={<div className="p-4">Loading session...</div>}>
+    <Suspense fallback={<div className="p-6">Loading tutor...</div>}>
       <SessionContent />
     </Suspense>
   )
