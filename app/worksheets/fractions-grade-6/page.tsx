@@ -1,90 +1,49 @@
-"use client"
+import Link from "next/link"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+const problems = [
+  "3/4 + 2/5",
+  "7/8 - 1/4",
+  "2/3 * 3/5",
+  "5/6 / 2/3"
+]
 
-export default function WorksheetPage() {
-  const [answers, setAnswers] = useState({})
-  const router = useRouter()
-
-  const problems = [
-    { id: 1, question: "1/2 + 3/4 =" },
-    { id: 2, question: "5/6 - 1/3 =" },
-    { id: 3, question: "2/3 × 3/5 =" },
-    { id: 4, question: "4/5 ÷ 2/3 =" }
-  ]
-
-  const handleChange = (id, value) => {
-    setAnswers({ ...answers, [id]: value })
-  }
-
-  const openTutor = (question) => {
-    router.push(`/session?question=${encodeURIComponent(question)}`)
-  }
-
+export default function FractionsGrade6Page() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 px-4 py-10">
+    <main className="min-h-screen bg-[#f5f7fb] text-gray-900 px-6 py-16">
+      <section className="max-w-3xl mx-auto text-center mb-12">
+        <div className="inline-flex items-center bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          6th Grade Math
+        </div>
 
-      {/* HERO */}
-      <div className="max-w-3xl mx-auto text-center mb-10">
-        <h1 className="text-3xl font-bold mb-3">
-          6th Grade Fractions Worksheet (Free + Answers)
+        <h1 className="text-4xl font-bold mb-4">
+          6th Grade Fractions Worksheet
         </h1>
-        <p className="text-gray-600 mb-5">
-          Practice fractions and get instant step-by-step help from your AI tutor.
+
+        <p className="text-gray-600 text-lg">
+          Practice fraction operations. If you get stuck, send the problem directly to MyVirtualTutor.
         </p>
+      </section>
 
-        <button
-          onClick={() => openTutor("Help me with fractions")}
-          className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90"
-        >
-          Start Solving with AI Tutor
-        </button>
-      </div>
-
-      {/* PROBLEMS */}
-      <div className="max-w-2xl mx-auto space-y-6">
-        {problems.map((p) => (
-          <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border">
-            <p className="text-lg font-medium mb-3">
-              {p.id}. {p.question}
+      <section className="max-w-2xl mx-auto space-y-5">
+        {problems.map((problem, index) => (
+          <div key={problem} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <p className="text-sm text-gray-500 mb-2">
+              Problem {index + 1}
             </p>
 
-            <input
-              type="text"
-              placeholder="Your answer"
-              value={answers[p.id] || ""}
-              onChange={(e) => handleChange(p.id, e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 mb-3"
-            />
+            <p className="text-2xl font-semibold mb-5">
+              {problem}
+            </p>
 
-            <button
-              onClick={() => openTutor(p.question)}
-              className="text-sm text-blue-600 hover:underline"
+            <Link
+              href={`/session?problem=${encodeURIComponent(problem)}`}
+              className="inline-flex bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
             >
-              Get step-by-step help →
-            </button>
+              Solve with AI Tutor →
+            </Link>
           </div>
         ))}
-      </div>
-
-      {/* MID CTA */}
-      <div className="max-w-2xl mx-auto text-center mt-12 bg-white p-6 rounded-2xl shadow-sm border">
-        <h2 className="text-xl font-semibold mb-2">
-          Stuck on a problem?
-        </h2>
-        <p className="text-gray-600 mb-4">
-          Get instant step-by-step explanations with your AI tutor.
-        </p>
-
-        <button
-          onClick={() => openTutor("I need help with fractions")}
-          className="bg-black text-white px-6 py-3 rounded-xl"
-        >
-          Start Free Session
-        </button>
-      </div>
-
-    </div>
+      </section>
+    </main>
   )
 }
