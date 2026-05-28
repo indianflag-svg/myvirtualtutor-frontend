@@ -11,10 +11,6 @@ export default function FractionsGrade6Page() {
   return (
     <main className="min-h-screen bg-[#f5f7fb] text-gray-900 px-6 py-16">
       <section className="max-w-3xl mx-auto text-center mb-12">
-        <div className="inline-flex items-center bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-          6th Grade Math
-        </div>
-
         <h1 className="text-4xl font-bold mb-4">
           6th Grade Fractions Worksheet
         </h1>
