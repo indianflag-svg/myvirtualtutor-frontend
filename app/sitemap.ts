@@ -1,37 +1,29 @@
-export default function sitemap() {
+import type { MetadataRoute } from "next"
 
-const base = "https://myvirtualtutor-frontend-swart.vercel.app"
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = "https://myvirtualtutor.com"
 
-const staticPages = [
-"",
-"/pricing",
-"/login",
-"/session"
-]
+  const routes = [
+    "",
+    "/pricing",
+    "/login",
+    "/worksheets",
+    "/worksheets/fractions-grade-6",
+    "/worksheets/grade-3-addition",
+    "/worksheets/grade-3-subtraction",
+    "/worksheets/grade-4-multiplication",
+    "/worksheets/grade-4-division",
+    "/worksheets/grade-5-fractions",
+    "/worksheets/grade-5-decimals",
+    "/worksheets/grade-6-ratios",
+    "/worksheets/grade-6-percentages",
+    "/worksheets/pre-algebra-equations"
+  ]
 
-const worksheetPages = [
-"/worksheets/grade-3-addition-worksheet",
-"/worksheets/grade-3-subtraction-worksheet",
-"/worksheets/grade-4-multiplication-worksheet",
-"/worksheets/grade-4-division-worksheet",
-"/worksheets/grade-5-fractions-worksheet",
-"/worksheets/grade-5-decimals-worksheet",
-"/worksheets/grade-6-ratios-worksheet",
-"/worksheets/grade-6-percentages-worksheet",
-"/worksheets/pre-algebra-equations-worksheet",
-"/worksheets/long-division-worksheet"
-]
-
-return [
-...staticPages.map(p=>({
-url: base + p,
-lastModified: new Date(),
-})),
-
-...worksheetPages.map(p=>({
-url: base + p,
-lastModified: new Date(),
-}))
-]
-
+  return routes.map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: route === "" ? 1 : route.includes("worksheets") ? 0.8 : 0.6
+  }))
 }
