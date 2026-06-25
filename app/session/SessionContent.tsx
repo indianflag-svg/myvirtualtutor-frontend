@@ -7,7 +7,7 @@ import { InlineMath } from 'react-katex'
 
 export default function SessionContent() {
   const searchParams = useSearchParams()
-  const initialQuestion = searchParams.get("question")
+  const initialQuestion = searchParams.get("problem") || searchParams.get("question")
 
   const [messages, setMessages] = useState([])
   const [steps, setSteps] = useState([])
