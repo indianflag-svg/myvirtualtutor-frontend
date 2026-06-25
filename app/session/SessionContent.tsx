@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
-import 'katex/dist/katex.min.css'
-import { InlineMath } from 'react-katex'
 
 export default function SessionContent() {
   const searchParams = useSearchParams()
@@ -26,25 +24,6 @@ export default function SessionContent() {
       startSolving(initialQuestion)
     }
   }, [initialQuestion])
-
-  const formatInlineMath = (text) => {
-    return text.replace(/(\d+)\/(\d+)/g, '\\frac{$1}{$2}')
-  }
-
-  const renderLine = (text) => {
-    const parts = text.split(/(\d+\/\d+)/g)
-
-    return parts.map((part, i) => {
-      if (/\d+\/\d+/.test(part)) {
-        return <InlineMath key={i} math={formatInlineMath(part)} />
-      }
-      return <span key={i}>{part}</span>
-    })
-  }
-
-  const parseSteps = (text) => {
-    return text.split("\n").filter(l => l.trim() !== "")
-  }
 
   const startSolving = async (question) => {
     setMessages([{ role: "user", content: question }])
